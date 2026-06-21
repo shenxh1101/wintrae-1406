@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, Input, ScrollView } from '@tarojs/components';
 import { useCamping } from '@/store/CampingContext';
 import { Destination } from '@/types/camping';
@@ -22,8 +22,13 @@ const getDestTypeLabel = (type: string) => {
   return map[type] || { text: '地点', tag: 'default' as const };
 };
 
+const getTodayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 const TripPage: React.FC = () => {
-  const { state, toggleChecklist, addDestination, addChecklistItem } = useCamping();
+  const { state, toggleChecklist, addDestination, addChecklistItem, markDestArrived } = useCamping();
   const [showModal, setShowModal] = useState(false);
   const [activeDayId, setActiveDayId] = useState('');
   const [formName, setFormName] = useState('');
@@ -33,6 +38,28 @@ const TripPage: React.FC = () => {
   const [showChecklistForm, setShowChecklistForm] = useState(false);
   const [checklistDayId, setChecklistDayId] = useState('');
   const [checklistTitle, setChecklistTitle] = useState('');
+  const [execMode, setExecMode] = useState(false);
+  const [showAllChecklist, setShowAllChecklist] = useState(false);
+
+  const todayStr = getTodayStr();
+
+  const execDay = useMemo(() => {
+    if (!execMode) return null;
+    const todayMatch = state.tripDays.find(d => d.date.startsWith(todayStr));
+    return todayMatch || state.tripDays[0] || null;
+  }, [execMode, state.tripDays, todayStr]);
+
+  const execDayIdx = useMemo(() => {
+    if (!execDay) return 0;
+    const idx = state.tripDays.findIndex(d => d.id === execDay.id);
+    return idx >= 0 ? idx : 0;
+  }, [execDay, state.tripDays]);
+
+  const nextUnarrivedId = useMemo(() => {
+    if (!execDay) return null;
+    const next = execDay.destinations.find(d => !d.arrived);
+    return next ? next.id : null;
+  }, [execDay]);
 
   const openAddDest = (dayId: string) => {
     setActiveDayId(dayId);
@@ -71,78 +98,137 @@ const TripPage: React.FC = () => {
     setShowChecklistForm(false);
   };
 
+  const handleArrive = (dayId: string, destId: string) => {
+    markDestArrived(dayId, destId);
+  };
+
+  const renderTimelineItem = (dayId: string, dest: Destination, isExec: boolean) => {
+    const typeInfo = getDestTypeLabel(dest.type);
+    const isMeeting = dest.type === 'meeting';
+    const isReturn = dest.type === 'return';
+    const isNext = isExec && dest.id === nextUnarrivedId;
+    const isArrived = isExec && !!dest.arrived;
+
+    return (
+      <View
+        key={dest.id}
+        className={classnames(
+          styles.timelineItem,
+          isExec && isNext && styles.execHighlight,
+          isExec && isArrived && styles.execArrived
+        )}
+      >
+        {isNext ? (
+          <View className={classnames(styles.timelineDot, styles.pulseDot)} />
+        ) : isArrived ? (
+          <View className={classnames(styles.timelineDot, styles.arrivedCheck)} />
+        ) : (
+          <View className={classnames(
+            styles.timelineDot,
+            isMeeting && styles.timelineDotMeeting,
+            isReturn && styles.timelineDotReturn
+          )} />
+        )}
+        <Text className={styles.timelineTime}>{dest.time}</Text>
+        <Text className={styles.timelineName}>{dest.name}</Text>
+        <Text className={styles.timelineAddr}>{dest.address}</Text>
+        <View className={styles.timelineTag}>
+          <TagBadge text={typeInfo.text} type={typeInfo.tag} />
+        </View>
+        {isExec && !dest.arrived && (
+          <View className={styles.arriveBtn} onClick={() => handleArrive(dayId, dest.id)}>
+            <Text className={styles.arriveBtnText}>到达</Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderDayCard = (day: typeof state.tripDays[0], dayIdx: number, isExec: boolean) => (
+    <View key={day.id} className={classnames(styles.dayCard, isExec && styles.execDayCard)}>
+      <View className={styles.dayHeader}>
+        <Text className={styles.dayDate}>{day.date}</Text>
+        <Text className={styles.dayBadge}>第 {dayIdx + 1} 天</Text>
+      </View>
+
+      <View className={styles.timeline}>
+        {day.destinations.map(dest => renderTimelineItem(day.id, dest, isExec))}
+      </View>
+
+      {!isExec && (
+        <View className={styles.addButtons}>
+          <View className={styles.addBtnSmall} onClick={() => openAddDest(day.id)}>
+            <Text className={styles.addBtnText}>+ 添加路线点</Text>
+          </View>
+        </View>
+      )}
+
+      <View className={styles.checklistSection}>
+        <View className={styles.checklistHeaderRow}>
+          <Text className={styles.checklistTitle}>
+            路线检查清单 ({day.checklist.filter(c => c.completed).length}/{day.checklist.length})
+          </Text>
+          {isExec && (
+            <View
+              className={styles.checklistFilter}
+              onClick={() => setShowAllChecklist(v => !v)}
+            >
+              <Text className={styles.checklistFilterText}>
+                {showAllChecklist ? '仅未完成' : '显示全部'}
+              </Text>
+            </View>
+          )}
+        </View>
+        {(isExec && !showAllChecklist ? day.checklist.filter(c => !c.completed) : day.checklist).map(item => (
+          <View
+            key={item.id}
+            className={styles.checklistItem}
+            onClick={() => toggleChecklist(day.id, item.id)}
+          >
+            <View className={classnames(
+              styles.checkbox,
+              item.completed && styles.checkboxChecked
+            )} />
+            <Text className={classnames(
+              styles.checklistText,
+              item.completed && styles.checklistTextDone
+            )}>
+              {item.title}
+            </Text>
+          </View>
+        ))}
+        {!isExec && (
+          <View className={styles.addChecklistBtn} onClick={() => openAddChecklist(day.id)}>
+            <Text className={styles.addChecklistText}>+ 添加检查项</Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+
   return (
     <View className={styles.page}>
       <View className={styles.header}>
         <Text className={styles.headerTitle}>{state.tripName}</Text>
-        <Text className={styles.headerSubtitle}>共 {state.tripDays.length} 天行程</Text>
+        <View className={styles.headerRow}>
+          <Text className={styles.headerSubtitle}>共 {state.tripDays.length} 天行程</Text>
+          <View
+            className={classnames(styles.modeToggle, execMode && styles.modeToggleActive)}
+            onClick={() => setExecMode(v => !v)}
+          >
+            <Text className={classnames(styles.modeToggleText, execMode && styles.modeToggleTextActive)}>
+              执行模式
+            </Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView scrollY className={styles.content}>
-        {state.tripDays.map((day, dayIdx) => (
-          <View key={day.id} className={styles.dayCard}>
-            <View className={styles.dayHeader}>
-              <Text className={styles.dayDate}>{day.date}</Text>
-              <Text className={styles.dayBadge}>第 {dayIdx + 1} 天</Text>
-            </View>
-
-            <View className={styles.timeline}>
-              {day.destinations.map(dest => {
-                const typeInfo = getDestTypeLabel(dest.type);
-                const isMeeting = dest.type === 'meeting';
-                const isReturn = dest.type === 'return';
-                return (
-                  <View key={dest.id} className={styles.timelineItem}>
-                    <View className={classnames(
-                      styles.timelineDot,
-                      isMeeting && styles.timelineDotMeeting,
-                      isReturn && styles.timelineDotReturn
-                    )} />
-                    <Text className={styles.timelineTime}>{dest.time}</Text>
-                    <Text className={styles.timelineName}>{dest.name}</Text>
-                    <Text className={styles.timelineAddr}>{dest.address}</Text>
-                    <View className={styles.timelineTag}>
-                      <TagBadge text={typeInfo.text} type={typeInfo.tag} />
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-
-            <View className={styles.addButtons}>
-              <View className={styles.addBtnSmall} onClick={() => openAddDest(day.id)}>
-                <Text className={styles.addBtnText}>+ 添加路线点</Text>
-              </View>
-            </View>
-
-            <View className={styles.checklistSection}>
-              <Text className={styles.checklistTitle}>
-                路线检查清单 ({day.checklist.filter(c => c.completed).length}/{day.checklist.length})
-              </Text>
-              {day.checklist.map(item => (
-                <View
-                  key={item.id}
-                  className={styles.checklistItem}
-                  onClick={() => toggleChecklist(day.id, item.id)}
-                >
-                  <View className={classnames(
-                    styles.checkbox,
-                    item.completed && styles.checkboxChecked
-                  )} />
-                  <Text className={classnames(
-                    styles.checklistText,
-                    item.completed && styles.checklistTextDone
-                  )}>
-                    {item.title}
-                  </Text>
-                </View>
-              ))}
-              <View className={styles.addChecklistBtn} onClick={() => openAddChecklist(day.id)}>
-                <Text className={styles.addChecklistText}>+ 添加检查项</Text>
-              </View>
-            </View>
-          </View>
-        ))}
+        {execMode && execDay ? (
+          renderDayCard(execDay, execDayIdx, true)
+        ) : (
+          state.tripDays.map((day, dayIdx) => renderDayCard(day, dayIdx, false))
+        )}
       </ScrollView>
 
       {showModal && (

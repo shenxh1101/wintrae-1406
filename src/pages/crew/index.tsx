@@ -8,7 +8,7 @@ import styles from './index.module.scss';
 
 const costColors = ['#2D6A4F', '#E76F51', '#E9C46A', '#264653', '#40916C'];
 
-type ModalType = 'member' | 'vehicle' | 'cost' | 'emergency' | '';
+type ModalType = 'member' | 'vehicle' | 'cost' | 'emergency' | 'costSplit' | 'vehiclePassenger' | '';
 
 const CrewPage: React.FC = () => {
   const {
@@ -16,7 +16,9 @@ const CrewPage: React.FC = () => {
     addMember, removeMember,
     addVehicle, removeVehicle,
     addEstimatedCost, removeEstimatedCost,
-    addEmergencyContact, removeEmergencyContact
+    addEmergencyContact, removeEmergencyContact,
+    updateVehiclePassengers,
+    updateCostSplit
   } = useCamping();
 
   const [modalType, setModalType] = useState<ModalType>('');
@@ -33,12 +35,42 @@ const CrewPage: React.FC = () => {
   const [ePhone, setEPhone] = useState('');
   const [eRelation, setERelation] = useState('');
 
+  const [splitCostId, setSplitCostId] = useState('');
+  const [splitSelectedIds, setSplitSelectedIds] = useState<string[]>([]);
+  const [passengerVehicleId, setPassengerVehicleId] = useState('');
+  const [passengerSelectedIds, setPassengerSelectedIds] = useState<string[]>([]);
+
   const totalEstimated = useMemo(() => {
     return state.estimatedCost.reduce((sum, c) => sum + c.amount, 0);
   }, [state.estimatedCost]);
 
+  const memberTotalShare = useMemo(() => {
+    const shares: Record<string, number> = {};
+    state.members.forEach(m => { shares[m.id] = 0; });
+    state.estimatedCost.forEach(cost => {
+      if (cost.splitMemberIds && cost.splitMemberIds.length > 0) {
+        const perPerson = cost.amount / cost.splitMemberIds.length;
+        cost.splitMemberIds.forEach(id => {
+          if (shares[id] !== undefined) {
+            shares[id] += perPerson;
+          }
+        });
+      }
+    });
+    return shares;
+  }, [state.estimatedCost, state.members]);
+
+  const hasAnySplit = useMemo(() => {
+    return state.estimatedCost.some(c => c.splitMemberIds && c.splitMemberIds.length > 0);
+  }, [state.estimatedCost]);
+
   const getInitial = (name: string) => {
     return name ? name.slice(0, 1) : '?';
+  };
+
+  const getMemberName = (id: string) => {
+    const member = state.members.find(m => m.id === id);
+    return member ? member.name : '未知';
   };
 
   const openModal = (type: ModalType) => {
@@ -47,6 +79,36 @@ const CrewPage: React.FC = () => {
     if (type === 'vehicle') { setVBrand(''); setVPlate(''); setVDriver(''); setVSeats('5'); }
     if (type === 'cost') { setCName(''); setCAmount(''); }
     if (type === 'emergency') { setEName(''); setEPhone(''); setERelation(''); }
+  };
+
+  const openSplitModal = (costId: string) => {
+    const cost = state.estimatedCost.find(c => c.id === costId);
+    setSplitCostId(costId);
+    setSplitSelectedIds(cost?.splitMemberIds || []);
+    setModalType('costSplit');
+  };
+
+  const openPassengerModal = (vehicleId: string) => {
+    const vehicle = state.vehicles.find(v => v.id === vehicleId);
+    setPassengerVehicleId(vehicleId);
+    setPassengerSelectedIds(vehicle?.passengers || []);
+    setModalType('vehiclePassenger');
+  };
+
+  const toggleSplitMember = (memberId: string) => {
+    setSplitSelectedIds(prev =>
+      prev.includes(memberId)
+        ? prev.filter(id => id !== memberId)
+        : [...prev, memberId]
+    );
+  };
+
+  const togglePassengerMember = (memberId: string) => {
+    setPassengerSelectedIds(prev =>
+      prev.includes(memberId)
+        ? prev.filter(id => id !== memberId)
+        : [...prev, memberId]
+    );
   };
 
   const handleSave = () => {
@@ -62,6 +124,10 @@ const CrewPage: React.FC = () => {
     } else if (modalType === 'emergency') {
       if (!eName.trim()) return;
       addEmergencyContact({ id: genId(), name: eName.trim(), phone: ePhone.trim(), relation: eRelation.trim() || '亲友' });
+    } else if (modalType === 'costSplit') {
+      updateCostSplit(splitCostId, splitSelectedIds);
+    } else if (modalType === 'vehiclePassenger') {
+      updateVehiclePassengers(passengerVehicleId, passengerSelectedIds);
     }
     setModalType('');
   };
@@ -78,6 +144,12 @@ const CrewPage: React.FC = () => {
         else if (type === 'emergency') removeEmergencyContact(id);
       }
     });
+  };
+
+  const getAvailablePassengers = (vehicleId: string) => {
+    const vehicle = state.vehicles.find(v => v.id === vehicleId);
+    if (!vehicle) return state.members;
+    return state.members.filter(m => m.name !== vehicle.driver);
   };
 
   return (
@@ -123,16 +195,37 @@ const CrewPage: React.FC = () => {
           <View className={styles.vehicleList}>
             {state.vehicles.map(vehicle => (
               <View key={vehicle.id} className={styles.vehicleItem}>
-                <View className={styles.vehicleIcon}>
-                  <Text>🚗</Text>
+                <View className={styles.vehicleRow}>
+                  <View className={styles.vehicleIcon}>
+                    <Text>🚗</Text>
+                  </View>
+                  <View className={styles.vehicleInfo}>
+                    <Text className={styles.vehicleBrand}>{vehicle.brand}</Text>
+                    <Text className={styles.vehicleDetail}>司机：{vehicle.driver} · {vehicle.seats}座</Text>
+                    <Text className={styles.vehiclePlate}>{vehicle.plate}</Text>
+                  </View>
+                  <View className={styles.deleteBtn} onClick={() => confirmDelete('vehicle', vehicle.id, vehicle.brand)}>
+                    <Text className={styles.deleteIcon}>✕</Text>
+                  </View>
                 </View>
-                <View className={styles.vehicleInfo}>
-                  <Text className={styles.vehicleBrand}>{vehicle.brand}</Text>
-                  <Text className={styles.vehicleDetail}>司机：{vehicle.driver} · {vehicle.seats}座</Text>
-                  <Text className={styles.vehiclePlate}>{vehicle.plate}</Text>
-                </View>
-                <View className={styles.deleteBtn} onClick={() => confirmDelete('vehicle', vehicle.id, vehicle.brand)}>
-                  <Text className={styles.deleteIcon}>✕</Text>
+                <View className={styles.passengerSection}>
+                  <View className={styles.passengerHeader}>
+                    <Text className={styles.seatUsage}>
+                      {(vehicle.passengers?.length || 0) + 1}/{vehicle.seats} 座
+                    </Text>
+                    <View className={styles.assignPassengerBtn} onClick={() => openPassengerModal(vehicle.id)}>
+                      <Text className={styles.assignPassengerBtnText}>分配乘客</Text>
+                    </View>
+                  </View>
+                  {vehicle.passengers && vehicle.passengers.length > 0 && (
+                    <View className={styles.passengerTags}>
+                      {vehicle.passengers.map(pid => (
+                        <View key={pid} className={styles.passengerTag}>
+                          <Text className={styles.passengerTagText}>{getMemberName(pid)}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </View>
               </View>
             ))}
@@ -153,23 +246,55 @@ const CrewPage: React.FC = () => {
             </View>
             <View className={styles.costList}>
               {state.estimatedCost.map((cost, idx) => (
-                <View key={cost.id} className={styles.costItem}>
-                  <View className={styles.costItemLeft}>
-                    <View
-                      className={styles.costDot}
-                      style={{ background: costColors[idx % costColors.length] }}
-                    />
-                    <Text className={styles.costName}>{cost.name}</Text>
-                  </View>
-                  <View className={styles.costItemRight}>
-                    <Text className={styles.costAmount}>¥{cost.amount}</Text>
-                    <View className={styles.deleteBtnSmall} onClick={() => confirmDelete('cost', cost.id, cost.name)}>
-                      <Text className={styles.deleteIconSmall}>✕</Text>
+                <View key={cost.id} className={styles.costItemWrapper}>
+                  <View className={styles.costItem}>
+                    <View className={styles.costItemLeft}>
+                      <View
+                        className={styles.costDot}
+                        style={{ background: costColors[idx % costColors.length] }}
+                      />
+                      <Text className={styles.costName}>{cost.name}</Text>
+                    </View>
+                    <View className={styles.costItemRight}>
+                      <Text className={styles.costAmount}>¥{cost.amount}</Text>
+                      <View className={styles.costSplitBtn} onClick={() => openSplitModal(cost.id)}>
+                        <Text className={styles.costSplitBtnText}>分摊</Text>
+                      </View>
+                      <View className={styles.deleteBtnSmall} onClick={() => confirmDelete('cost', cost.id, cost.name)}>
+                        <Text className={styles.deleteIconSmall}>✕</Text>
+                      </View>
                     </View>
                   </View>
+                  {cost.splitMemberIds && cost.splitMemberIds.length > 0 && (
+                    <View className={styles.costSplitInfo}>
+                      <Text className={styles.costSplitPerPerson}>
+                        每人 ¥{(cost.amount / cost.splitMemberIds.length).toFixed(2)}
+                      </Text>
+                      <View className={styles.splitMemberTags}>
+                        {cost.splitMemberIds.map(mid => (
+                          <View key={mid} className={styles.splitMemberTag}>
+                            <Text className={styles.splitMemberTagText}>{getMemberName(mid)}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
                 </View>
               ))}
             </View>
+            {hasAnySplit && (
+              <View className={styles.splitOverview}>
+                <Text className={styles.splitOverviewTitle}>分摊总览</Text>
+                {state.members.map(member => (
+                  <View key={member.id} className={styles.splitOverviewItem}>
+                    <Text className={styles.splitOverviewName}>{member.name}</Text>
+                    <Text className={styles.splitOverviewAmount}>
+                      ¥{memberTotalShare[member.id]?.toFixed(2) || '0.00'}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         </View>
 
@@ -273,6 +398,54 @@ const CrewPage: React.FC = () => {
                   <Text className={styles.formLabel}>关系</Text>
                   <Input className={styles.formInput} placeholder="如：父亲、母亲" value={eRelation} onInput={e => setERelation(e.detail.value)} />
                 </View>
+              </>
+            )}
+            {modalType === 'costSplit' && (
+              <>
+                <Text className={styles.modalTitle}>选择分摊人员</Text>
+                <ScrollView scrollY className={styles.checkboxScroll}>
+                  {state.members.map(member => {
+                    const checked = splitSelectedIds.includes(member.id);
+                    return (
+                      <View
+                        key={member.id}
+                        className={`${styles.checkboxItem} ${checked ? styles.checkboxChecked : ''}`}
+                        onClick={() => toggleSplitMember(member.id)}
+                      >
+                        <View className={styles.checkboxRow}>
+                          <View className={`${styles.checkboxBox} ${checked ? styles.checkboxActive : ''}`}>
+                            {checked && <Text className={styles.checkboxTick}>✓</Text>}
+                          </View>
+                          <Text className={styles.checkboxLabel}>{member.name}</Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </>
+            )}
+            {modalType === 'vehiclePassenger' && (
+              <>
+                <Text className={styles.modalTitle}>分配乘客</Text>
+                <ScrollView scrollY className={styles.checkboxScroll}>
+                  {getAvailablePassengers(passengerVehicleId).map(member => {
+                    const checked = passengerSelectedIds.includes(member.id);
+                    return (
+                      <View
+                        key={member.id}
+                        className={`${styles.checkboxItem} ${checked ? styles.checkboxChecked : ''}`}
+                        onClick={() => togglePassengerMember(member.id)}
+                      >
+                        <View className={styles.checkboxRow}>
+                          <View className={`${styles.checkboxBox} ${checked ? styles.checkboxActive : ''}`}>
+                            {checked && <Text className={styles.checkboxTick}>✓</Text>}
+                          </View>
+                          <Text className={styles.checkboxLabel}>{member.name}</Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
               </>
             )}
             <View className={styles.modalActions}>

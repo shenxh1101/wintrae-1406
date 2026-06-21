@@ -289,6 +289,13 @@
   @include text-ellipsis;
 }
 
+.tripTitleRow {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
 .tripDate {
   font-size: $font-size-sm;
   color: $color-text-tertiary;
@@ -502,5 +509,41 @@
 .confirmBtnText {
   font-size: $font-size-md;
   color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.archiveBtn {
+  @include button-reset;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2rpx dashed rgba(255, 255, 255, 0.4);
+  border-radius: $radius-button;
+  height: $button-height-md;
+  width: 100%;
+  margin-top: $spacing-lg;
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+.archiveBtnText {
+  font-size: $font-size-md;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: $font-weight-medium;
+}
+
+.archivedBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  background: rgba(45, 106, 79, 0.1);
+  border-radius: $radius-sm;
+  margin-left: $spacing-sm;
+}
+
+.archivedBadgeText {
+  font-size: $font-size-xs;
+  color: $color-primary;
   font-weight: $font-weight-medium;
 }

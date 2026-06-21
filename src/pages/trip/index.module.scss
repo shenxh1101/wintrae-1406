@@ -357,3 +357,138 @@
   color: $color-text-white;
   font-weight: $font-weight-medium;
 }
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modeToggle {
+  @include button-reset;
+  padding: 8rpx 24rpx;
+  border-radius: $radius-button;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  height: 52rpx;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.modeToggleActive {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+.modeToggleText {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: $font-weight-medium;
+}
+
+.modeToggleTextActive {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.execDayCard {
+  border: 3rpx solid $color-primary;
+  box-shadow: 0 4rpx 20rpx rgba(45, 106, 79, 0.15);
+}
+
+.execHighlight {
+  background: rgba(45, 106, 79, 0.06);
+  border-left: 6rpx solid $color-primary;
+  border-radius: $radius-sm;
+  padding-right: $spacing-md;
+  margin-left: -$spacing-sm;
+  padding-left: calc(70rpx + #{$spacing-sm});
+}
+
+.execArrived {
+  opacity: 0.5;
+
+  .timelineTime,
+  .timelineName,
+  .timelineAddr {
+    text-decoration: line-through;
+  }
+}
+
+.arrivedCheck {
+  background: $color-primary !important;
+  box-shadow: 0 0 0 4rpx rgba(45, 106, 79, 0.2) !important;
+
+  &::after {
+    content: '';
+    width: 12rpx;
+    height: 20rpx;
+    border-right: 4rpx solid $color-text-white;
+    border-bottom: 4rpx solid $color-text-white;
+    transform: rotate(45deg) translate(-2rpx, -2rpx);
+  }
+}
+
+.arriveBtn {
+  @include button-reset;
+  margin-top: 12rpx;
+  height: 52rpx;
+  padding: 0 32rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.arriveBtnText {
+  font-size: $font-size-xs;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.checklistHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.checklistFilter {
+  @include button-reset;
+  padding: 6rpx 20rpx;
+  height: 44rpx;
+  border-radius: $radius-button;
+  background: rgba(45, 106, 79, 0.08);
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.checklistFilterText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0rpx rgba(45, 106, 79, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 16rpx rgba(45, 106, 79, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0rpx rgba(45, 106, 79, 0);
+  }
+}
+
+.pulseDot {
+  background: $color-primary !important;
+  animation: pulse 1.8s ease-in-out infinite;
+}

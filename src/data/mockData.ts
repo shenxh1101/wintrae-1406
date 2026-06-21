@@ -64,12 +64,15 @@ export const initialState: CampingState = {
     { id: 'm4', name: '赵六', phone: '13800138004', role: '摄影师' }
   ],
   vehicles: [
-    { id: 'v1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5 },
-    { id: 'v2', brand: '丰田 RAV4', plate: '浙A·67890', driver: '李四', seats: 5 }
+    { id: 'v1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: ['m2', 'm3'] },
+    { id: 'v2', brand: '丰田 RAV4', plate: '浙A·67890', driver: '李四', seats: 5, passengers: ['m4'] }
   ],
   emergencyContacts: [
     { id: 'e1', name: '张爸', phone: '13900139001', relation: '父亲' },
     { id: 'e2', name: '李妈', phone: '13900139002', relation: '母亲' }
+  ],
+  weatherRecords: [
+    { id: 'w1', wind: '微风 2级', rain: '无降雨', nightTemp: '12°C', fireSafe: '适合', timestamp: '2025-06-20 18:00' }
   ],
   estimatedCost: [
     { id: 'ec1', name: '油费/过路费', amount: 400 },

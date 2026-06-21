@@ -229,3 +229,143 @@
   color: $color-text-white;
   font-weight: $font-weight-medium;
 }
+
+.weatherCard {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-top: $spacing-lg;
+  backdrop-filter: blur(8px);
+}
+
+.weatherEmpty {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  display: block;
+}
+
+.weatherGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+}
+
+.weatherItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.weatherLabel {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.weatherValue {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.weatherRiskBadge {
+  display: inline-block;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+  align-self: flex-start;
+}
+
+.badgeGreen {
+  background: rgba(45, 106, 79, 0.3);
+  color: #B7E4C7;
+}
+
+.badgeYellow {
+  background: rgba(233, 196, 106, 0.3);
+  color: #F4D35E;
+}
+
+.badgeRed {
+  background: rgba(231, 111, 81, 0.3);
+  color: #F4A261;
+}
+
+.weatherTimestamp {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: $spacing-sm;
+  display: block;
+}
+
+.addWeatherBtn {
+  @include button-reset;
+  margin-top: $spacing-md;
+  height: $button-height-sm;
+  border-radius: $radius-round;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.35);
+
+  &:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+.addWeatherBtnText {
+  font-size: $font-size-sm;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.formInput {
+  width: 100%;
+  height: $button-height-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: 0 $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.fireSafeSelector {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.fireSafeOption {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-sm;
+  border-radius: $radius-md;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+
+  &:active {
+    opacity: 0.7;
+  }
+
+  Text {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+}
+
+.fireSafeOptionActive {
+  background: rgba($color-primary, 0.1);
+  border-color: $color-primary;
+
+  Text {
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}

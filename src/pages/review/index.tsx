@@ -12,6 +12,7 @@ const ReviewPage: React.FC = () => {
     addActualCost, removeActualCost,
     addMissedItem, removeMissedItem,
     updateReviewNotes,
+    archiveReview,
     copyFromPastTrip
   } = useCamping();
 
@@ -73,6 +74,26 @@ const ReviewPage: React.FC = () => {
     } else {
       Taro.showToast({ title: '该行程无计划快照', icon: 'none' });
     }
+  };
+
+  const handleArchive = () => {
+    const hasContent = state.review.photos.length > 0
+      || state.review.actualCost.length > 0
+      || state.review.missedItems.length > 0
+      || state.review.notes.trim().length > 0;
+    if (!hasContent) {
+      Taro.showToast({ title: '请先填写复盘内容', icon: 'none' });
+      return;
+    }
+    Taro.showModal({
+      title: '归档确认',
+      content: '归档后当前复盘将移入历史行程，是否继续？',
+      success: (res) => {
+        if (!res.confirm) return;
+        archiveReview();
+        Taro.showToast({ title: '已归档到历史行程', icon: 'success' });
+      }
+    });
   };
 
   return (
@@ -155,6 +176,10 @@ const ReviewPage: React.FC = () => {
               maxlength={500}
             />
           </View>
+
+          <View className={styles.archiveBtn} onClick={handleArchive}>
+            <Text className={styles.archiveBtnText}>📦 归档到历史行程</Text>
+          </View>
         </View>
 
         <View className={styles.divider}></View>
@@ -186,7 +211,14 @@ const ReviewPage: React.FC = () => {
           state.pastTrips.map(trip => (
             <View key={trip.id} className={styles.tripCard}>
               <View className={styles.tripHeader}>
-                <Text className={styles.tripTitle}>{trip.tripName}</Text>
+                <View className={styles.tripTitleRow}>
+                  <Text className={styles.tripTitle}>{trip.tripName}</Text>
+                  {trip.archived && (
+                    <View className={styles.archivedBadge}>
+                      <Text className={styles.archivedBadgeText}>已归档</Text>
+                    </View>
+                  )}
+                </View>
                 <Text className={styles.tripDate}>{trip.date}</Text>
               </View>
 

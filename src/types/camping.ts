@@ -4,6 +4,7 @@ export interface Destination {
   address: string;
   time: string;
   type: 'destination' | 'meeting' | 'return';
+  arrived?: boolean;
 }
 
 export interface ChecklistItem {
@@ -41,6 +42,15 @@ export interface CampInfo {
   notes: string;
 }
 
+export interface WeatherRecord {
+  id: string;
+  wind: string;
+  rain: string;
+  nightTemp: string;
+  fireSafe: string;
+  timestamp: string;
+}
+
 export interface Member {
   id: string;
   name: string;
@@ -54,6 +64,7 @@ export interface Vehicle {
   plate: string;
   driver: string;
   seats: number;
+  passengers: string[];
 }
 
 export interface EmergencyContact {
@@ -67,6 +78,7 @@ export interface CostItem {
   id: string;
   name: string;
   amount: number;
+  splitMemberIds?: string[];
 }
 
 export interface PhotoItem {
@@ -94,6 +106,7 @@ export interface TripReview {
   missedItems: string[];
   notes: string;
   planSnapshot?: PlanSnapshot;
+  archived?: boolean;
 }
 
 export interface CampingState {
@@ -101,6 +114,7 @@ export interface CampingState {
   tripDays: TripDay[];
   gearList: GearItem[];
   campInfo: CampInfo;
+  weatherRecords: WeatherRecord[];
   members: Member[];
   vehicles: Vehicle[];
   emergencyContacts: EmergencyContact[];

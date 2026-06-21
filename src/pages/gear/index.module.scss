@@ -209,3 +209,110 @@
   color: $color-text-tertiary;
   font-size: $font-size-sm;
 }
+
+.viewModeToggle {
+  display: flex;
+  background: $color-bg-card;
+  margin: $spacing-md $spacing-lg 0;
+  padding: $spacing-xs;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+}
+
+.viewModeBtn {
+  flex: 1;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  transition: all $transition-fast;
+  position: relative;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.viewModeBtnActive {
+  background: $color-primary;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.unclaimedBadge {
+  position: absolute;
+  top: 2rpx;
+  right: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  line-height: 32rpx;
+  text-align: center;
+  font-size: 18rpx;
+  color: $color-text-white;
+  background: $color-error;
+  border-radius: $radius-round;
+  padding: 0 8rpx;
+}
+
+.personSection {
+  margin-bottom: $spacing-md;
+}
+
+.personHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0 $spacing-sm;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.personHeaderUnclaimed {
+  color: $color-error;
+}
+
+.statsLine {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-normal;
+}
+
+.personGearList {
+  border-radius: $radius-md;
+  overflow: hidden;
+}
+
+.personGearItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+  background: $color-bg-card;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.personGearChecked {
+  border-left: 6rpx solid $color-success;
+}
+
+.personGearUnchecked {
+  border-left: 6rpx solid $color-error;
+  background: rgba($color-error, 0.03);
+}
+
+.gearCategoryTag {
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+}
