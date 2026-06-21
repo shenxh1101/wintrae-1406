@@ -152,8 +152,8 @@ export const initialState: CampingState = {
         { id: 'm4', name: '赵六', phone: '13800138004', role: '摄影师' }
       ],
       vehicles: [
-        { id: 'v1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5 },
-        { id: 'v2', brand: '丰田 RAV4', plate: '浙A·67890', driver: '李四', seats: 5 }
+        { id: 'v1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: ['m2', 'm3'] },
+        { id: 'v2', brand: '丰田 RAV4', plate: '浙A·67890', driver: '李四', seats: 5, passengers: ['m4'] }
       ],
       emergencyContacts: [
         { id: 'e1', name: '张爸', phone: '13900139001', relation: '父亲' },
@@ -235,7 +235,7 @@ export const initialState: CampingState = {
           { id: 'pm2', name: '李四', phone: '13800138002', role: '副领队' }
         ],
         vehicles: [
-          { id: 'pv1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5 }
+          { id: 'pv1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: ['pm2'] }
         ],
         emergencyContacts: [
           { id: 'pe1', name: '张爸', phone: '13900139001', relation: '父亲' }
@@ -309,7 +309,7 @@ export const initialState: CampingState = {
           { id: 'qm1', name: '张三', phone: '13800138001', role: '领队' }
         ],
         vehicles: [
-          { id: 'qv1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5 }
+          { id: 'qv1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: [] }
         ],
         emergencyContacts: [],
         estimatedCost: [

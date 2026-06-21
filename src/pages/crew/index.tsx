@@ -117,7 +117,7 @@ const CrewPage: React.FC = () => {
       addMember({ id: genId(), name: mName.trim(), phone: mPhone.trim(), role: mRole.trim() || '成员' });
     } else if (modalType === 'vehicle') {
       if (!vBrand.trim()) return;
-      addVehicle({ id: genId(), brand: vBrand.trim(), plate: vPlate.trim(), driver: vDriver.trim(), seats: Number(vSeats) || 5 });
+      addVehicle({ id: genId(), brand: vBrand.trim(), plate: vPlate.trim(), driver: vDriver.trim(), seats: Number(vSeats) || 5, passengers: [] });
     } else if (modalType === 'cost') {
       if (!cName.trim() || !cAmount.trim()) return;
       addEstimatedCost({ id: genId(), name: cName.trim(), amount: Number(cAmount) || 0 });
