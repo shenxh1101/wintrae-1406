@@ -6,17 +6,241 @@
   padding-bottom: 48rpx;
 }
 
-.summaryCard {
+.scrollContent {
+  height: 100vh;
+}
+
+.currentTrip {
   background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
   padding: $spacing-xl $spacing-lg 56rpx;
   border-bottom-left-radius: 32rpx;
   border-bottom-right-radius: 32rpx;
 }
 
+.currentTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: $spacing-lg;
+}
+
+.photoSection {
+  margin-bottom: $spacing-md;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.sectionLabel {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: $spacing-sm;
+}
+
+.smallAddBtn {
+  @include button-reset;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4rpx 16rpx;
+  border-radius: $radius-button;
+  height: 44rpx;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.smallAddBtnText {
+  font-size: $font-size-xs;
+  color: $color-text-white;
+  white-space: nowrap;
+}
+
+.photoScroll {
+  @include scroll-x-container;
+  margin-bottom: $spacing-sm;
+}
+
+.photoItemWrap {
+  @include scroll-x-item(200rpx);
+  height: 150rpx;
+  margin-right: $spacing-sm;
+  border-radius: $radius-md;
+  overflow: hidden;
+  position: relative;
+
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.pastPhotoItem {
+  @include scroll-x-item(200rpx);
+  height: 150rpx;
+  margin-right: $spacing-sm;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.photoImg {
+  width: 100%;
+  height: 100%;
+}
+
+.photoDelete {
+  position: absolute;
+  top: 4rpx;
+  right: 4rpx;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: $radius-round;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photoDeleteText {
+  font-size: 18rpx;
+  color: $color-text-white;
+}
+
+.uploadBtn {
+  @include button-reset;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2rpx dashed rgba(255, 255, 255, 0.4);
+  border-radius: $radius-md;
+  height: 80rpx;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.uploadBtnText {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.costSection {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.costRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-xs 0;
+}
+
+.costRowName {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.costRowRight {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.costRowAmount {
+  font-size: $font-size-sm;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.costDeleteBtn {
+  @include button-reset;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: $radius-round;
+  background: rgba(255, 255, 255, 0.15);
+
+  &:active {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.costDeleteText {
+  font-size: 18rpx;
+  color: $color-text-white;
+}
+
+.missedSection {
+  margin-bottom: $spacing-md;
+}
+
+.missedTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.missedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  background: rgba(231, 111, 81, 0.3);
+  border-radius: $radius-sm;
+}
+
+.missedTagText {
+  font-size: $font-size-xs;
+  color: $color-text-white;
+}
+
+.missedTagDelete {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.notesSection {
+  margin-bottom: $spacing-sm;
+}
+
+.notesTextarea {
+  width: 100%;
+  min-height: 120rpx;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-white;
+  box-sizing: border-box;
+  line-height: $line-height-normal;
+}
+
+.divider {
+  height: $spacing-md;
+}
+
+.summaryCard {
+  margin: 0 $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-top: -32rpx;
+  position: relative;
+  z-index: 1;
+}
+
 .summaryTitle {
   font-size: $font-size-lg;
   font-weight: $font-weight-semibold;
-  color: $color-text-white;
+  color: $color-text-primary;
   margin-bottom: $spacing-lg;
 }
 
@@ -31,27 +255,22 @@
 }
 
 .statValue {
-  font-size: 44rpx;
+  font-size: 40rpx;
   font-weight: $font-weight-bold;
-  color: $color-text-white;
+  color: $color-primary;
   margin-bottom: $spacing-xs;
 }
 
 .statLabel {
   font-size: $font-size-xs;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.content {
-  padding: $spacing-lg;
-  margin-top: -32rpx;
+  color: $color-text-tertiary;
 }
 
 .tripCard {
   background: $color-bg-card;
   border-radius: $radius-lg;
   padding: $spacing-lg;
-  margin-bottom: $spacing-md;
+  margin: $spacing-md $spacing-lg;
   box-shadow: $shadow-card;
 }
 
@@ -77,68 +296,30 @@
   margin-left: $spacing-sm;
 }
 
-.photoSection {
+.pastPhotoSection {
   margin-bottom: $spacing-md;
 }
 
-.photoLabel {
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-  margin-bottom: $spacing-sm;
-  display: flex;
-  align-items: center;
-}
-
-.photoIcon {
-  margin-right: $spacing-xs;
-  font-size: $font-size-sm;
-}
-
-.photoScroll {
-  @include scroll-x-container;
-}
-
-.photoItem {
-  @include scroll-x-item(240rpx);
-  height: 180rpx;
-  margin-right: $spacing-sm;
-  border-radius: $radius-md;
-  overflow: hidden;
-
-  &:last-child {
-    margin-right: 0;
-  }
-}
-
-.photoImg {
-  width: 100%;
-  height: 100%;
-}
-
-.costSection {
+.pastCostSection {
   background: linear-gradient(135deg, rgba(231, 111, 81, 0.08) 0%, rgba(244, 162, 97, 0.08) 100%);
   border-radius: $radius-md;
   padding: $spacing-md;
   margin-bottom: $spacing-md;
 }
 
-.costRow {
+.pastCostRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: $spacing-sm;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+  padding: $spacing-xs 0;
 }
 
-.costItemName {
+.pastCostName {
   font-size: $font-size-sm;
   color: $color-text-secondary;
 }
 
-.costItemAmount {
+.pastCostAmount {
   font-size: $font-size-sm;
   color: $color-text-primary;
   font-weight: $font-weight-medium;
@@ -150,75 +331,39 @@
   margin: $spacing-sm 0;
 }
 
-.costTotalRow {
+.pastCostTotal {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.costTotalLabel {
+.pastCostTotalLabel {
   font-size: $font-size-md;
   color: $color-text-primary;
   font-weight: $font-weight-semibold;
 }
 
-.costTotalAmount {
+.pastCostTotalAmount {
   font-size: $font-size-xl;
   color: $color-secondary;
   font-weight: $font-weight-bold;
 }
 
-.missedSection {
+.pastMissedSection {
   margin-bottom: $spacing-md;
 }
 
-.missedLabel {
+.pastMissedLabel {
   font-size: $font-size-sm;
   color: $color-text-secondary;
   margin-bottom: $spacing-sm;
-  display: flex;
-  align-items: center;
 }
 
-.missedIcon {
-  margin-right: $spacing-xs;
-  font-size: $font-size-sm;
-}
-
-.missedTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $spacing-sm;
-}
-
-.missedTag {
-  display: inline-flex;
-  align-items: center;
-  padding: $spacing-xs $spacing-sm;
-  background: rgba(231, 111, 81, 0.1);
-  border-radius: $radius-sm;
-  font-size: $font-size-xs;
-  color: $color-secondary;
-}
-
-.notesSection {
+.pastNotesSection {
   margin-bottom: $spacing-md;
 }
 
-.notesLabel {
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-  margin-bottom: $spacing-sm;
-  display: flex;
-  align-items: center;
-}
-
-.notesIcon {
-  margin-right: $spacing-xs;
-  font-size: $font-size-sm;
-}
-
-.notesText {
+.pastNotesText {
   font-size: $font-size-sm;
   color: $color-text-primary;
   line-height: $line-height-loose;
@@ -244,12 +389,19 @@
   }
 }
 
+.copyButtonText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
 .emptyState {
   background: $color-bg-card;
   border-radius: $radius-lg;
   padding: $spacing-xl * 2;
   text-align: center;
   box-shadow: $shadow-card;
+  margin: 0 $spacing-lg;
 }
 
 .emptyIcon {
@@ -260,4 +412,95 @@
 .emptyText {
   font-size: $font-size-md;
   color: $color-text-tertiary;
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: flex-end;
+}
+
+.modalContent {
+  background: $color-bg-card;
+  border-top-left-radius: 32rpx;
+  border-top-right-radius: 32rpx;
+  padding: $spacing-xl $spacing-lg;
+  width: 100%;
+}
+
+.modalTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.formGroup {
+  margin-bottom: $spacing-md;
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.formInput {
+  width: 100%;
+  height: 80rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: 0 $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.modalActions {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-lg;
+}
+
+.cancelBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.cancelBtnText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.confirmBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.confirmBtnText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
 }

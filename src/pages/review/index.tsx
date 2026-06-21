@@ -1,11 +1,25 @@
-import React, { useMemo } from 'react';
-import { View, Text, Image, ScrollView } from '@tarojs/components';
+import React, { useState, useMemo } from 'react';
+import { View, Text, Image, Input, ScrollView, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useCamping } from '@/store/CampingContext';
+import { genId } from '@/utils/id';
 import styles from './index.module.scss';
 
 const ReviewPage: React.FC = () => {
-  const { state, copyFromPastTrip } = useCamping();
+  const {
+    state,
+    addReviewPhoto, removeReviewPhoto,
+    addActualCost, removeActualCost,
+    addMissedItem, removeMissedItem,
+    updateReviewNotes,
+    copyFromPastTrip
+  } = useCamping();
+
+  const [costName, setCostName] = useState('');
+  const [costAmount, setCostAmount] = useState('');
+  const [missedItem, setMissedItem] = useState('');
+  const [showCostForm, setShowCostForm] = useState(false);
+  const [showMissedForm, setShowMissedForm] = useState(false);
 
   const stats = useMemo(() => {
     const totalTrips = state.pastTrips.length;
@@ -14,36 +28,155 @@ const ReviewPage: React.FC = () => {
     return { totalTrips, totalCost, latestDate };
   }, [state.pastTrips]);
 
-  const handleCopy = (tripId: string, tripName: string) => {
-    copyFromPastTrip(tripId);
-    Taro.showToast({
-      title: `已复制「${tripName}」`,
-      icon: 'success',
-      duration: 2000
+  const reviewTotalCost = useMemo(() => {
+    return state.review.actualCost.reduce((sum, c) => sum + c.amount, 0);
+  }, [state.review.actualCost]);
+
+  const handleChooseImage = () => {
+    Taro.chooseImage({
+      count: 9,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        res.tempFilePaths.forEach(path => {
+          addReviewPhoto({ id: genId(), url: path });
+        });
+      },
+      fail: (err) => {
+        console.error('[ReviewPage] chooseImage error:', err);
+      }
     });
+  };
+
+  const handleAddCost = () => {
+    if (!costName.trim() || !costAmount.trim()) return;
+    addActualCost({ id: genId(), name: costName.trim(), amount: Number(costAmount) || 0 });
+    setCostName('');
+    setCostAmount('');
+    setShowCostForm(false);
+  };
+
+  const handleAddMissed = () => {
+    if (!missedItem.trim()) return;
+    addMissedItem(missedItem.trim());
+    setMissedItem('');
+    setShowMissedForm(false);
+  };
+
+  const handleCopy = (tripId: string) => {
+    const success = copyFromPastTrip(tripId);
+    if (success) {
+      Taro.showToast({ title: '已复制为新计划', icon: 'success', duration: 1500 });
+      setTimeout(() => {
+        Taro.switchTab({ url: '/pages/trip/index' });
+      }, 1500);
+    } else {
+      Taro.showToast({ title: '该行程无计划快照', icon: 'none' });
+    }
   };
 
   return (
     <View className={styles.page}>
-      <View className={styles.summaryCard}>
-        <Text className={styles.summaryTitle}>露营总览</Text>
-        <View className={styles.summaryStats}>
-          <View className={styles.statItem}>
-            <Text className={styles.statValue}>{stats.totalTrips}</Text>
-            <Text className={styles.statLabel}>出行次数</Text>
+      <ScrollView scrollY className={styles.scrollContent}>
+        <View className={styles.currentTrip}>
+          <Text className={styles.currentTitle}>当前行程复盘</Text>
+
+          <View className={styles.photoSection}>
+            <View className={styles.sectionHeader}>
+              <Text className={styles.sectionLabel}>📷 精彩瞬间 ({state.review.photos.length})</Text>
+            </View>
+            {state.review.photos.length > 0 && (
+              <ScrollView scrollX className={styles.photoScroll}>
+                {state.review.photos.map(photo => (
+                  <View key={photo.id} className={styles.photoItemWrap}>
+                    <Image className={styles.photoImg} src={photo.url} mode="aspectFill" />
+                    <View
+                      className={styles.photoDelete}
+                      onClick={() => removeReviewPhoto(photo.id)}
+                    >
+                      <Text className={styles.photoDeleteText}>✕</Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+            <View className={styles.uploadBtn} onClick={handleChooseImage}>
+              <Text className={styles.uploadBtnText}>+ 上传照片</Text>
+            </View>
           </View>
-          <View className={styles.statItem}>
-            <Text className={styles.statValue}>¥{stats.totalCost}</Text>
-            <Text className={styles.statLabel}>累计花费</Text>
+
+          <View className={styles.costSection}>
+            <View className={styles.sectionHeader}>
+              <Text className={styles.sectionLabel}>💰 实际花费 (¥{reviewTotalCost})</Text>
+              <View className={styles.smallAddBtn} onClick={() => { setCostName(''); setCostAmount(''); setShowCostForm(true); }}>
+                <Text className={styles.smallAddBtnText}>+ 添加</Text>
+              </View>
+            </View>
+            {state.review.actualCost.map(cost => (
+              <View key={cost.id} className={styles.costRow}>
+                <Text className={styles.costRowName}>{cost.name}</Text>
+                <View className={styles.costRowRight}>
+                  <Text className={styles.costRowAmount}>¥{cost.amount}</Text>
+                  <View className={styles.costDeleteBtn} onClick={() => removeActualCost(cost.id)}>
+                    <Text className={styles.costDeleteText}>✕</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
           </View>
-          <View className={styles.statItem}>
-            <Text className={styles.statValue}>{stats.latestDate.slice(5)}</Text>
-            <Text className={styles.statLabel}>最近出行</Text>
+
+          <View className={styles.missedSection}>
+            <View className={styles.sectionHeader}>
+              <Text className={styles.sectionLabel}>⚠️ 遗漏物品</Text>
+              <View className={styles.smallAddBtn} onClick={() => { setMissedItem(''); setShowMissedForm(true); }}>
+                <Text className={styles.smallAddBtnText}>+ 添加</Text>
+              </View>
+            </View>
+            <View className={styles.missedTags}>
+              {state.review.missedItems.map((item, idx) => (
+                <View key={idx} className={styles.missedTag}>
+                  <Text className={styles.missedTagText}>{item}</Text>
+                  <Text
+                    className={styles.missedTagDelete}
+                    onClick={() => removeMissedItem(idx)}
+                  >✕</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View className={styles.notesSection}>
+            <Text className={styles.sectionLabel}>📝 心得记录</Text>
+            <Textarea
+              className={styles.notesTextarea}
+              placeholder="记录本次露营的感想和经验..."
+              value={state.review.notes}
+              onInput={e => updateReviewNotes(e.detail.value)}
+              maxlength={500}
+            />
           </View>
         </View>
-      </View>
 
-      <ScrollView scrollY className={styles.content}>
+        <View className={styles.divider}></View>
+
+        <View className={styles.summaryCard}>
+          <Text className={styles.summaryTitle}>历史总览</Text>
+          <View className={styles.summaryStats}>
+            <View className={styles.statItem}>
+              <Text className={styles.statValue}>{stats.totalTrips}</Text>
+              <Text className={styles.statLabel}>出行次数</Text>
+            </View>
+            <View className={styles.statItem}>
+              <Text className={styles.statValue}>¥{stats.totalCost}</Text>
+              <Text className={styles.statLabel}>累计花费</Text>
+            </View>
+            <View className={styles.statItem}>
+              <Text className={styles.statValue}>{stats.latestDate.slice(5)}</Text>
+              <Text className={styles.statLabel}>最近出行</Text>
+            </View>
+          </View>
+        </View>
+
         {state.pastTrips.length === 0 ? (
           <View className={styles.emptyState}>
             <Text className={styles.emptyIcon}>🏕️</Text>
@@ -58,19 +191,11 @@ const ReviewPage: React.FC = () => {
               </View>
 
               {trip.photos.length > 0 && (
-                <View className={styles.photoSection}>
-                  <Text className={styles.photoLabel}>
-                    <Text className={styles.photoIcon}>📷</Text>
-                    精彩瞬间 ({trip.photos.length})
-                  </Text>
+                <View className={styles.pastPhotoSection}>
                   <ScrollView scrollX className={styles.photoScroll}>
                     {trip.photos.map(photo => (
-                      <View key={photo.id} className={styles.photoItem}>
-                        <Image
-                          className={styles.photoImg}
-                          src={photo.url}
-                          mode="aspectFill"
-                        />
+                      <View key={photo.id} className={styles.pastPhotoItem}>
+                        <Image className={styles.photoImg} src={photo.url} mode="aspectFill" />
                       </View>
                     ))}
                   </ScrollView>
@@ -78,36 +203,31 @@ const ReviewPage: React.FC = () => {
               )}
 
               {trip.actualCost.length > 0 && (
-                <View className={styles.costSection}>
+                <View className={styles.pastCostSection}>
                   {trip.actualCost.map((cost, idx) => (
                     <View key={cost.id}>
-                      <View className={styles.costRow}>
-                        <Text className={styles.costItemName}>{cost.name}</Text>
-                        <Text className={styles.costItemAmount}>¥{cost.amount}</Text>
+                      <View className={styles.pastCostRow}>
+                        <Text className={styles.pastCostName}>{cost.name}</Text>
+                        <Text className={styles.pastCostAmount}>¥{cost.amount}</Text>
                       </View>
-                      {idx < trip.actualCost.length - 1 && (
-                        <View className={styles.costDivider} />
-                      )}
+                      {idx < trip.actualCost.length - 1 && <View className={styles.costDivider} />}
                     </View>
                   ))}
                   <View className={styles.costDivider} />
-                  <View className={styles.costTotalRow}>
-                    <Text className={styles.costTotalLabel}>总花费</Text>
-                    <Text className={styles.costTotalAmount}>¥{trip.totalCost}</Text>
+                  <View className={styles.pastCostTotal}>
+                    <Text className={styles.pastCostTotalLabel}>总花费</Text>
+                    <Text className={styles.pastCostTotalAmount}>¥{trip.totalCost}</Text>
                   </View>
                 </View>
               )}
 
               {trip.missedItems.length > 0 && (
-                <View className={styles.missedSection}>
-                  <Text className={styles.missedLabel}>
-                    <Text className={styles.missedIcon}>⚠️</Text>
-                    遗漏物品（下次记得带）
-                  </Text>
+                <View className={styles.pastMissedSection}>
+                  <Text className={styles.pastMissedLabel}>⚠️ 遗漏物品</Text>
                   <View className={styles.missedTags}>
                     {trip.missedItems.map((item, idx) => (
                       <View key={idx} className={styles.missedTag}>
-                        <Text>{item}</Text>
+                        <Text className={styles.missedTagText}>{item}</Text>
                       </View>
                     ))}
                   </View>
@@ -115,25 +235,62 @@ const ReviewPage: React.FC = () => {
               )}
 
               {trip.notes && (
-                <View className={styles.notesSection}>
-                  <Text className={styles.notesLabel}>
-                    <Text className={styles.notesIcon}>📝</Text>
-                    心得记录
-                  </Text>
-                  <Text className={styles.notesText}>{trip.notes}</Text>
+                <View className={styles.pastNotesSection}>
+                  <Text className={styles.pastNotesText}>{trip.notes}</Text>
                 </View>
               )}
 
-              <View
-                className={styles.copyButton}
-                onClick={() => handleCopy(trip.id, trip.tripName)}
-              >
-                <Text>📋 复制为新计划</Text>
+              <View className={styles.copyButton} onClick={() => handleCopy(trip.id)}>
+                <Text className={styles.copyButtonText}>� 复制为新计划</Text>
               </View>
             </View>
           ))
         )}
       </ScrollView>
+
+      {showCostForm && (
+        <View className={styles.modalMask} onClick={() => setShowCostForm(false)}>
+          <View className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>添加实际花费</Text>
+            <View className={styles.formGroup}>
+              <Text className={styles.formLabel}>费用名称</Text>
+              <Input className={styles.formInput} placeholder="如：油费" value={costName} onInput={e => setCostName(e.detail.value)} />
+            </View>
+            <View className={styles.formGroup}>
+              <Text className={styles.formLabel}>金额</Text>
+              <Input className={styles.formInput} type="digit" placeholder="请输入金额" value={costAmount} onInput={e => setCostAmount(e.detail.value)} />
+            </View>
+            <View className={styles.modalActions}>
+              <View className={styles.cancelBtn} onClick={() => setShowCostForm(false)}>
+                <Text className={styles.cancelBtnText}>取消</Text>
+              </View>
+              <View className={styles.confirmBtn} onClick={handleAddCost}>
+                <Text className={styles.confirmBtnText}>保存</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {showMissedForm && (
+        <View className={styles.modalMask} onClick={() => setShowMissedForm(false)}>
+          <View className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>添加遗漏物品</Text>
+            <View className={styles.formGroup}>
+              <Text className={styles.formLabel}>物品名称</Text>
+              <Input className={styles.formInput} placeholder="如：防晒霜" value={missedItem} onInput={e => setMissedItem(e.detail.value)} />
+            </View>
+            <View className={styles.modalActions}>
+              <View className={styles.cancelBtn} onClick={() => setShowMissedForm(false)}>
+                <Text className={styles.cancelBtnText}>取消</Text>
+              </View>
+              <View className={styles.confirmBtn} onClick={handleAddMissed}>
+                <Text className={styles.confirmBtnText}>保存</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

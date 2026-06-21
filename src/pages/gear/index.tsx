@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text } from '@tarojs/components';
+import Taro from '@tarojs/taro';
 import { useCamping } from '@/store/CampingContext';
 import { GearCategory } from '@/types/camping';
 import classnames from 'classnames';
@@ -15,7 +16,7 @@ const categoryMap: Record<GearCategory, { label: string; key: GearCategory }> = 
 const categories: GearCategory[] = ['tent', 'cooking', 'food', 'emergency'];
 
 const GearPage: React.FC = () => {
-  const { state, toggleGear } = useCamping();
+  const { state, toggleGear, claimGear, unclaimGear } = useCamping();
   const [activeTab, setActiveTab] = useState<GearCategory>('tent');
 
   const totalProgress = useMemo(() => {
@@ -39,7 +40,30 @@ const GearPage: React.FC = () => {
   }, [state.gearList, activeTab]);
 
   const getInitial = (name: string) => {
-    return name ? name.slice(-1) : '?';
+    return name ? name.slice(0, 1) : '?';
+  };
+
+  const handleClaim = (gearId: string, currentClaim: string | undefined) => {
+    const memberNames = state.members.map(m => m.name);
+    if (memberNames.length === 0) {
+      Taro.showToast({ title: '请先在同行页添加人员', icon: 'none' });
+      return;
+    }
+    const options = [...memberNames, '取消认领'];
+    Taro.showActionSheet({
+      itemList: options,
+      success: (res) => {
+        const idx = res.tapIndex;
+        if (idx === options.length - 1) {
+          unclaimGear(gearId);
+        } else {
+          claimGear(gearId, memberNames[idx]);
+        }
+      },
+      fail: (err) => {
+        console.error('[GearPage] ActionSheet error:', err);
+      }
+    });
   };
 
   return (
@@ -81,15 +105,14 @@ const GearPage: React.FC = () => {
           <View className={styles.emptyState}>暂无物资</View>
         ) : (
           filteredGear.map(gear => (
-            <View
-              key={gear.id}
-              className={styles.gearItem}
-              onClick={() => toggleGear(gear.id)}
-            >
-              <View className={classnames(
-                styles.checkbox,
-                gear.checked && styles.checkboxChecked
-              )} />
+            <View key={gear.id} className={styles.gearItem}>
+              <View
+                className={classnames(
+                  styles.checkbox,
+                  gear.checked && styles.checkboxChecked
+                )}
+                onClick={() => toggleGear(gear.id)}
+              />
               <View className={styles.gearInfo}>
                 <Text className={classnames(
                   styles.gearName,
@@ -99,16 +122,24 @@ const GearPage: React.FC = () => {
                 </Text>
                 <Text className={styles.gearQty}>数量：{gear.quantity}</Text>
               </View>
-              {gear.claimedBy ? (
-                <View className={styles.claimTag}>
-                  <View className={styles.claimAvatar}>
-                    <Text>{getInitial(gear.claimedBy)}</Text>
+              <View
+                className={classnames(
+                  styles.claimArea,
+                  gear.claimedBy && styles.claimAreaActive
+                )}
+                onClick={() => handleClaim(gear.id, gear.claimedBy)}
+              >
+                {gear.claimedBy ? (
+                  <View className={styles.claimTag}>
+                    <View className={styles.claimAvatar}>
+                      <Text>{getInitial(gear.claimedBy)}</Text>
+                    </View>
+                    <Text className={styles.claimName}>{gear.claimedBy}</Text>
                   </View>
-                  <Text className={styles.claimName}>{gear.claimedBy}</Text>
-                </View>
-              ) : (
-                <View className={styles.claimEmpty}>认领</View>
-              )}
+                ) : (
+                  <View className={styles.claimEmpty}>认领</View>
+                )}
+              </View>
             </View>
           ))
         )}

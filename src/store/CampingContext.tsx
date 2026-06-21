@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { CampingState, Destination, ChecklistItem, GearItem, Member, Vehicle, EmergencyContact, CostItem, PhotoItem } from '@/types/camping';
+import { CampingState, Destination, ChecklistItem, Member, Vehicle, EmergencyContact, CostItem, PhotoItem, CampInfo } from '@/types/camping';
 import { initialState } from '@/data/mockData';
+import { genId } from '@/utils/id';
 
 interface CampingContextType {
   state: CampingState;
@@ -10,7 +11,8 @@ interface CampingContextType {
   addChecklistItem: (dayId: string, item: ChecklistItem) => void;
   toggleGear: (gearId: string) => void;
   claimGear: (gearId: string, memberName: string) => void;
-  updateCampInfo: (key: keyof CampingState['campInfo'], value: string) => void;
+  unclaimGear: (gearId: string) => void;
+  updateCampInfo: (key: keyof CampInfo, value: string) => void;
   addMember: (member: Member) => void;
   removeMember: (id: string) => void;
   addVehicle: (vehicle: Vehicle) => void;
@@ -20,11 +22,13 @@ interface CampingContextType {
   addEstimatedCost: (item: CostItem) => void;
   removeEstimatedCost: (id: string) => void;
   addReviewPhoto: (photo: PhotoItem) => void;
+  removeReviewPhoto: (id: string) => void;
   addActualCost: (item: CostItem) => void;
+  removeActualCost: (id: string) => void;
   addMissedItem: (item: string) => void;
   removeMissedItem: (index: number) => void;
   updateReviewNotes: (notes: string) => void;
-  copyFromPastTrip: (tripId: string) => void;
+  copyFromPastTrip: (tripId: string) => boolean;
 }
 
 const CampingContext = createContext<CampingContextType | undefined>(undefined);
@@ -86,7 +90,14 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
     }));
   };
 
-  const updateCampInfo = (key: keyof CampingState['campInfo'], value: string) => {
+  const unclaimGear = (gearId: string) => {
+    setState(prev => ({
+      ...prev,
+      gearList: prev.gearList.map(g => g.id === gearId ? { ...g, claimedBy: undefined } : g)
+    }));
+  };
+
+  const updateCampInfo = (key: keyof CampInfo, value: string) => {
     setState(prev => ({
       ...prev,
       campInfo: { ...prev.campInfo, [key]: value }
@@ -132,15 +143,37 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
     }));
   };
 
+  const removeReviewPhoto = (id: string) => {
+    setState(prev => ({
+      ...prev,
+      review: { ...prev.review, photos: prev.review.photos.filter(p => p.id !== id) }
+    }));
+  };
+
   const addActualCost = (item: CostItem) => {
     setState(prev => ({
       ...prev,
       review: {
         ...prev.review,
         actualCost: [...prev.review.actualCost, item],
-        totalCost: prev.review.totalCost + item.amount
+        totalCost: prev.review.actualCost.reduce((sum, c) => sum + c.amount, 0) + item.amount
       }
     }));
+  };
+
+  const removeActualCost = (id: string) => {
+    setState(prev => {
+      const removed = prev.review.actualCost.find(c => c.id === id);
+      const newActualCost = prev.review.actualCost.filter(c => c.id !== id);
+      return {
+        ...prev,
+        review: {
+          ...prev.review,
+          actualCost: newActualCost,
+          totalCost: Math.max(0, prev.review.totalCost - (removed?.amount || 0))
+        }
+      };
+    });
   };
 
   const addMissedItem = (item: string) => {
@@ -164,11 +197,46 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
     setState(prev => ({ ...prev, review: { ...prev.review, notes } }));
   };
 
-  const copyFromPastTrip = (tripId: string) => {
-    const trip = state.pastTrips.find(t => t.id === tripId);
-    if (trip) {
-      console.log('[CampingContext] 复制行程:', trip.tripName);
-    }
+  const copyFromPastTrip = (tripId: string): boolean => {
+    let found = false;
+    setState(prev => {
+      const trip = prev.pastTrips.find(t => t.id === tripId);
+      if (!trip || !trip.planSnapshot) return prev;
+      found = true;
+      const snap = trip.planSnapshot;
+      return {
+        ...prev,
+        tripName: `${trip.tripName}(副本)`,
+        tripDays: snap.tripDays.map(day => ({
+          ...day,
+          id: genId(),
+          destinations: day.destinations.map(d => ({ ...d, id: genId() })),
+          checklist: day.checklist.map(c => ({ ...c, id: genId(), completed: false }))
+        })),
+        gearList: snap.gearList.map(g => ({
+          ...g,
+          id: genId(),
+          checked: false,
+          claimedBy: undefined
+        })),
+        campInfo: { ...snap.campInfo, id: genId() },
+        members: snap.members.map(m => ({ ...m, id: genId() })),
+        vehicles: snap.vehicles.map(v => ({ ...v, id: genId() })),
+        emergencyContacts: snap.emergencyContacts.map(e => ({ ...e, id: genId() })),
+        estimatedCost: snap.estimatedCost.map(c => ({ ...c, id: genId() })),
+        review: {
+          id: genId(),
+          tripName: `${trip.tripName}(副本)`,
+          date: '',
+          photos: [],
+          actualCost: [],
+          totalCost: 0,
+          missedItems: [],
+          notes: ''
+        }
+      };
+    });
+    return found;
   };
 
   return (
@@ -180,6 +248,7 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
       addChecklistItem,
       toggleGear,
       claimGear,
+      unclaimGear,
       updateCampInfo,
       addMember,
       removeMember,
@@ -190,7 +259,9 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
       addEstimatedCost,
       removeEstimatedCost,
       addReviewPhoto,
+      removeReviewPhoto,
       addActualCost,
+      removeActualCost,
       addMissedItem,
       removeMissedItem,
       updateReviewNotes,

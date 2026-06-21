@@ -14,6 +14,31 @@
   margin-bottom: $spacing-lg;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.addBtn {
+  @include button-reset;
+  background: rgba(45, 106, 79, 0.08);
+  padding: 4rpx 20rpx;
+  border-radius: $radius-button;
+  height: 48rpx;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.addBtnText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+}
+
 .memberList {
   background: $color-bg-card;
   border-radius: $radius-lg;
@@ -29,10 +54,6 @@
 
   &:last-child {
     border-bottom: none;
-  }
-
-  &:active {
-    background: $color-bg-hover;
   }
 }
 
@@ -86,6 +107,25 @@
   color: $color-text-tertiary;
 }
 
+.deleteBtn {
+  @include button-reset;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  background: rgba(245, 63, 63, 0.08);
+  margin-left: $spacing-sm;
+  flex-shrink: 0;
+
+  &:active {
+    background: rgba(245, 63, 63, 0.15);
+  }
+}
+
+.deleteIcon {
+  font-size: $font-size-sm;
+  color: $color-error;
+}
+
 .vehicleList {
   background: $color-bg-card;
   border-radius: $radius-lg;
@@ -101,10 +141,6 @@
 
   &:last-child {
     border-bottom: none;
-  }
-
-  &:active {
-    background: $color-bg-hover;
   }
 }
 
@@ -179,10 +215,6 @@
   align-items: center;
   justify-content: space-between;
   padding: $spacing-sm $spacing-lg;
-
-  &:active {
-    background: $color-bg-hover;
-  }
 }
 
 .costItemLeft {
@@ -202,10 +234,33 @@
   color: $color-text-primary;
 }
 
+.costItemRight {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
 .costAmount {
   font-size: $font-size-md;
   color: $color-text-secondary;
   font-weight: $font-weight-medium;
+}
+
+.deleteBtnSmall {
+  @include button-reset;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: $radius-round;
+  background: rgba(245, 63, 63, 0.06);
+
+  &:active {
+    background: rgba(245, 63, 63, 0.12);
+  }
+}
+
+.deleteIconSmall {
+  font-size: $font-size-xs;
+  color: $color-error;
 }
 
 .emergencyList {
@@ -224,10 +279,6 @@
 
   &:last-child {
     border-bottom: none;
-  }
-
-  &:active {
-    background: rgba(231, 111, 81, 0.05);
   }
 }
 
@@ -279,4 +330,96 @@
 .emergencyPhone {
   font-size: $font-size-sm;
   color: $color-text-tertiary;
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: flex-end;
+}
+
+.modalContent {
+  background: $color-bg-card;
+  border-top-left-radius: 32rpx;
+  border-top-right-radius: 32rpx;
+  padding: $spacing-xl $spacing-lg;
+  width: 100%;
+  max-height: 80vh;
+}
+
+.modalTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.formGroup {
+  margin-bottom: $spacing-md;
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.formInput {
+  width: 100%;
+  height: 80rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: 0 $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.modalActions {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-lg;
+}
+
+.cancelBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.cancelBtnText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.confirmBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.confirmBtnText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
 }

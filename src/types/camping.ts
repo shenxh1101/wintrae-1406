@@ -74,6 +74,16 @@ export interface PhotoItem {
   url: string;
 }
 
+export interface PlanSnapshot {
+  tripDays: TripDay[];
+  gearList: GearItem[];
+  campInfo: CampInfo;
+  members: Member[];
+  vehicles: Vehicle[];
+  emergencyContacts: EmergencyContact[];
+  estimatedCost: CostItem[];
+}
+
 export interface TripReview {
   id: string;
   tripName: string;
@@ -83,6 +93,7 @@ export interface TripReview {
   totalCost: number;
   missedItems: string[];
   notes: string;
+  planSnapshot?: PlanSnapshot;
 }
 
 export interface CampingState {
