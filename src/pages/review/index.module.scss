@@ -1,0 +1,263 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 48rpx;
+}
+
+.summaryCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl $spacing-lg 56rpx;
+  border-bottom-left-radius: 32rpx;
+  border-bottom-right-radius: 32rpx;
+}
+
+.summaryTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  margin-bottom: $spacing-lg;
+}
+
+.summaryStats {
+  display: flex;
+  justify-content: space-between;
+}
+
+.statItem {
+  flex: 1;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 44rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: $spacing-xs;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.content {
+  padding: $spacing-lg;
+  margin-top: -32rpx;
+}
+
+.tripCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.tripHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.tripTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  flex: 1;
+  @include text-ellipsis;
+}
+
+.tripDate {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.photoSection {
+  margin-bottom: $spacing-md;
+}
+
+.photoLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+}
+
+.photoIcon {
+  margin-right: $spacing-xs;
+  font-size: $font-size-sm;
+}
+
+.photoScroll {
+  @include scroll-x-container;
+}
+
+.photoItem {
+  @include scroll-x-item(240rpx);
+  height: 180rpx;
+  margin-right: $spacing-sm;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.photoImg {
+  width: 100%;
+  height: 100%;
+}
+
+.costSection {
+  background: linear-gradient(135deg, rgba(231, 111, 81, 0.08) 0%, rgba(244, 162, 97, 0.08) 100%);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.costRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.costItemName {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.costItemAmount {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.costDivider {
+  height: 1rpx;
+  background: rgba(231, 111, 81, 0.15);
+  margin: $spacing-sm 0;
+}
+
+.costTotalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.costTotalLabel {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.costTotalAmount {
+  font-size: $font-size-xl;
+  color: $color-secondary;
+  font-weight: $font-weight-bold;
+}
+
+.missedSection {
+  margin-bottom: $spacing-md;
+}
+
+.missedLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+}
+
+.missedIcon {
+  margin-right: $spacing-xs;
+  font-size: $font-size-sm;
+}
+
+.missedTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.missedTag {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-xs $spacing-sm;
+  background: rgba(231, 111, 81, 0.1);
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  color: $color-secondary;
+}
+
+.notesSection {
+  margin-bottom: $spacing-md;
+}
+
+.notesLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+}
+
+.notesIcon {
+  margin-right: $spacing-xs;
+  font-size: $font-size-sm;
+}
+
+.notesText {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+  background: $color-bg-tag;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+}
+
+.copyButton {
+  @include button-reset;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  height: $button-height-md;
+  width: 100%;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.emptyState {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl * 2;
+  text-align: center;
+  box-shadow: $shadow-card;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

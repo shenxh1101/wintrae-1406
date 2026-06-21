@@ -1,0 +1,99 @@
+export interface Destination {
+  id: string;
+  name: string;
+  address: string;
+  time: string;
+  type: 'destination' | 'meeting' | 'return';
+}
+
+export interface ChecklistItem {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
+export interface TripDay {
+  id: string;
+  date: string;
+  destinations: Destination[];
+  checklist: ChecklistItem[];
+}
+
+export type GearCategory = 'tent' | 'cooking' | 'food' | 'emergency';
+
+export interface GearItem {
+  id: string;
+  name: string;
+  category: GearCategory;
+  quantity: number;
+  checked: boolean;
+  claimedBy?: string;
+}
+
+export interface CampInfo {
+  id: string;
+  name: string;
+  waterSource: string;
+  toilet: string;
+  parking: string;
+  signal: string;
+  fireRule: string;
+  notes: string;
+}
+
+export interface Member {
+  id: string;
+  name: string;
+  phone: string;
+  role: string;
+}
+
+export interface Vehicle {
+  id: string;
+  brand: string;
+  plate: string;
+  driver: string;
+  seats: number;
+}
+
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  phone: string;
+  relation: string;
+}
+
+export interface CostItem {
+  id: string;
+  name: string;
+  amount: number;
+}
+
+export interface PhotoItem {
+  id: string;
+  url: string;
+}
+
+export interface TripReview {
+  id: string;
+  tripName: string;
+  date: string;
+  photos: PhotoItem[];
+  actualCost: CostItem[];
+  totalCost: number;
+  missedItems: string[];
+  notes: string;
+}
+
+export interface CampingState {
+  tripName: string;
+  tripDays: TripDay[];
+  gearList: GearItem[];
+  campInfo: CampInfo;
+  members: Member[];
+  vehicles: Vehicle[];
+  emergencyContacts: EmergencyContact[];
+  estimatedCost: CostItem[];
+  review: TripReview;
+  pastTrips: TripReview[];
+}

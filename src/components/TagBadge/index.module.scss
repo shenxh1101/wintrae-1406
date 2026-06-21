@@ -1,0 +1,31 @@
+@use '@/styles/variables.scss' as *;
+
+.tagBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.primary {
+  background: rgba(45, 106, 79, 0.1);
+  color: $color-primary;
+}
+
+.secondary {
+  background: rgba(231, 111, 81, 0.1);
+  color: $color-secondary;
+}
+
+.accent {
+  background: rgba(233, 196, 106, 0.25);
+  color: #B8860B;
+}
+
+.default {
+  background: $color-bg-tag;
+  color: $color-text-secondary;
+}

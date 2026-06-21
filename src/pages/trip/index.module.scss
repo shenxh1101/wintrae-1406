@@ -1,0 +1,210 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 48rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl $spacing-lg 56rpx;
+  border-bottom-left-radius: 32rpx;
+  border-bottom-right-radius: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(45, 106, 79, 0.2);
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: $spacing-sm;
+}
+
+.headerSubtitle {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.content {
+  padding: $spacing-lg $spacing-lg 0;
+  margin-top: -32rpx;
+}
+
+.dayCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.dayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.dayDate {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.dayBadge {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background: rgba(45, 106, 79, 0.1);
+  padding: 6rpx 16rpx;
+  border-radius: $radius-sm;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 20rpx;
+  margin-bottom: $spacing-lg;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 38rpx;
+  top: 10rpx;
+  bottom: 10rpx;
+  width: 4rpx;
+  background: $color-border;
+}
+
+.timelineItem {
+  position: relative;
+  padding-left: 70rpx;
+  padding-bottom: $spacing-md;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.timelineDot {
+  position: absolute;
+  left: 24rpx;
+  top: 8rpx;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: $radius-round;
+  background: $color-primary;
+  border: 4rpx solid $color-bg-card;
+  box-shadow: 0 0 0 4rpx rgba(45, 106, 79, 0.2);
+}
+
+.timelineDotMeeting {
+  background: $color-accent;
+  box-shadow: 0 0 0 4rpx rgba(233, 196, 106, 0.2);
+}
+
+.timelineDotReturn {
+  background: $color-secondary;
+  box-shadow: 0 0 0 4rpx rgba(231, 111, 81, 0.2);
+}
+
+.timelineTime {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin-bottom: 4rpx;
+}
+
+.timelineName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.timelineAddr {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.timelineTag {
+  margin-top: 8rpx;
+}
+
+.checklistSection {
+  border-top: 1rpx solid $color-divider;
+  padding-top: $spacing-md;
+}
+
+.checklistTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.checklistItem {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-round;
+  border: 3rpx solid $color-border;
+  margin-right: $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all $transition-fast;
+}
+
+.checkboxChecked {
+  background: $color-primary;
+  border-color: $color-primary;
+
+  &::after {
+    content: '';
+    width: 12rpx;
+    height: 20rpx;
+    border-right: 4rpx solid $color-text-white;
+    border-bottom: 4rpx solid $color-text-white;
+    transform: rotate(45deg) translate(-2rpx, -2rpx);
+  }
+}
+
+.checklistText {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  flex: 1;
+}
+
+.checklistTextDone {
+  color: $color-text-tertiary;
+  text-decoration: line-through;
+}
+
+.addButton {
+  @include button-reset;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  height: $button-height-md;
+  padding: 0 $spacing-xl;
+  border-radius: $radius-button;
+  margin-top: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
