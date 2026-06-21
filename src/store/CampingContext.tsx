@@ -17,6 +17,7 @@ interface CampingContextType {
   addWeatherRecord: (record: WeatherRecord) => void;
   addMember: (member: Member) => void;
   removeMember: (id: string) => void;
+  toggleMemberConfirm: (id: string) => void;
   addVehicle: (vehicle: Vehicle) => void;
   removeVehicle: (id: string) => void;
   updateVehiclePassengers: (vehicleId: string, passengers: string[]) => void;
@@ -132,7 +133,21 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   const removeMember = (id: string) => {
-    setState(prev => ({ ...prev, members: prev.members.filter(m => m.id !== id) }));
+    setState(prev => ({
+      ...prev,
+      members: prev.members.filter(m => m.id !== id),
+      vehicles: prev.vehicles.map(v => ({
+        ...v,
+        passengers: v.passengers.filter(pid => pid !== id)
+      }))
+    }));
+  };
+
+  const toggleMemberConfirm = (id: string) => {
+    setState(prev => ({
+      ...prev,
+      members: prev.members.map(m => m.id === id ? { ...m, confirmed: !m.confirmed } : m)
+    }));
   };
 
   const addVehicle = (vehicle: Vehicle) => {
@@ -146,7 +161,15 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
   const updateVehiclePassengers = (vehicleId: string, passengers: string[]) => {
     setState(prev => ({
       ...prev,
-      vehicles: prev.vehicles.map(v => v.id === vehicleId ? { ...v, passengers } : v)
+      vehicles: prev.vehicles.map(v => {
+        if (v.id === vehicleId) {
+          return { ...v, passengers };
+        }
+        return {
+          ...v,
+          passengers: v.passengers.filter(pid => !passengers.includes(pid))
+        };
+      })
     }));
   };
 
@@ -238,33 +261,44 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
     setState(prev => {
       const now = new Date();
       const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const gearClaimedBy: Record<string, string[]> = {};
+      prev.gearList.forEach(g => {
+        if (g.claimedBy) {
+          if (!gearClaimedBy[g.claimedBy]) gearClaimedBy[g.claimedBy] = [];
+          gearClaimedBy[g.claimedBy].push(g.name);
+        }
+      });
+      const departureSnapshot = {
+        members: prev.members,
+        vehicles: prev.vehicles,
+        gearClaimedBy
+      };
+      const planSnapshot = {
+        tripDays: prev.tripDays,
+        gearList: prev.gearList,
+        campInfo: prev.campInfo,
+        members: prev.members,
+        vehicles: prev.vehicles,
+        emergencyContacts: prev.emergencyContacts,
+        estimatedCost: prev.estimatedCost,
+        departureSnapshot
+      };
       const archivedTrip: TripReview = {
         ...prev.review,
         date: prev.review.date || dateStr,
         archived: true,
-        planSnapshot: {
-          tripDays: prev.tripDays,
-          gearList: prev.gearList,
-          campInfo: prev.campInfo,
-          members: prev.members,
-          vehicles: prev.vehicles,
-          emergencyContacts: prev.emergencyContacts,
-          estimatedCost: prev.estimatedCost
-        }
+        planSnapshot
       };
       return {
         ...prev,
         pastTrips: [archivedTrip, ...prev.pastTrips],
         review: {
-          id: genId(),
-          tripName: prev.tripName,
-          date: '',
-          photos: [],
-          actualCost: [],
-          totalCost: 0,
-          missedItems: [],
-          notes: ''
-        }
+          ...prev.review,
+          date: prev.review.date || dateStr,
+          archived: true,
+          planSnapshot
+        },
+        members: prev.members.map(m => ({ ...m, confirmed: false }))
       };
     });
   };
@@ -292,7 +326,7 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
           claimedBy: undefined
         })),
         campInfo: { ...snap.campInfo, id: genId() },
-        members: snap.members.map(m => ({ ...m, id: genId() })),
+        members: snap.members.map(m => ({ ...m, id: genId(), confirmed: false })),
         vehicles: snap.vehicles.map(v => ({ ...v, id: genId(), passengers: [] })),
         emergencyContacts: snap.emergencyContacts.map(e => ({ ...e, id: genId() })),
         estimatedCost: snap.estimatedCost.map(c => ({ ...c, id: genId(), splitMemberIds: [] })),
@@ -326,6 +360,7 @@ export const CampingProvider: React.FC<{ children: ReactNode }> = ({ children })
       addWeatherRecord,
       addMember,
       removeMember,
+      toggleMemberConfirm,
       addVehicle,
       removeVehicle,
       updateVehiclePassengers,

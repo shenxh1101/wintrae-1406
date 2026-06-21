@@ -172,6 +172,10 @@ const GearPage: React.FC = () => {
           const checkedCount = group.items.filter(g => g.checked).length;
           const totalCount = group.items.length;
           const isUnclaimed = group.name === '未认领';
+          const memberId = state.members.find(m => m.name === group.name)?.id;
+          const vehicle = memberId
+            ? state.vehicles.find(v => v.driver === group.name || v.passengers.includes(memberId))
+            : undefined;
           return (
             <View key={group.name} className={styles.personSection}>
               <View className={styles.personHeader}>
@@ -185,6 +189,19 @@ const GearPage: React.FC = () => {
                   已准备 {checkedCount}/{totalCount} 项
                 </Text>
               </View>
+              {!isUnclaimed && (
+                <View className={styles.personVehicleLine}>
+                  {vehicle ? (
+                    <Text className={styles.personVehicle}>
+                      🚗 乘坐: {vehicle.brand} · {vehicle.plate}
+                    </Text>
+                  ) : (
+                    <Text className={styles.personNoVehicle}>
+                      ⚠️ 未分配车辆
+                    </Text>
+                  )}
+                </View>
+              )}
               <View className={styles.personGearList}>
                 {group.items.map(gear => (
                   <View
@@ -208,6 +225,11 @@ const GearPage: React.FC = () => {
                       )}>
                         {gear.name}
                       </Text>
+                      {!isUnclaimed && vehicle && (
+                        <Text className={styles.personGearCarHint}>
+                          携带：{vehicle.brand}
+                        </Text>
+                      )}
                       <Text className={styles.gearQty}>
                         数量：{gear.quantity}
                         {!isUnclaimed && (

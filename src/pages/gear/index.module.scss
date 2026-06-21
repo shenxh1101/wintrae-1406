@@ -316,3 +316,25 @@
   color: $color-text-tertiary;
   font-size: $font-size-xs;
 }
+
+.personVehicleLine {
+  padding-bottom: $spacing-sm;
+}
+
+.personVehicle {
+  font-size: $font-size-xs;
+  color: $color-success;
+  font-weight: $font-weight-medium;
+}
+
+.personNoVehicle {
+  font-size: $font-size-xs;
+  color: $color-error;
+  font-weight: $font-weight-medium;
+}
+
+.personGearCarHint {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-bottom: 4rpx;
+}

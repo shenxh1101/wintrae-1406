@@ -56,6 +56,7 @@ export interface Member {
   name: string;
   phone: string;
   role: string;
+  confirmed?: boolean;
 }
 
 export interface Vehicle {
@@ -94,6 +95,11 @@ export interface PlanSnapshot {
   vehicles: Vehicle[];
   emergencyContacts: EmergencyContact[];
   estimatedCost: CostItem[];
+  departureSnapshot?: {
+    members: Member[];
+    vehicles: Vehicle[];
+    gearClaimedBy: Record<string, string[]>;
+  };
 }
 
 export interface TripReview {

@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro';
 import { useCamping } from '@/store/CampingContext';
 import { genId } from '@/utils/id';
 import SectionHeader from '@/components/SectionHeader';
+import classnames from 'classnames';
 import styles from './index.module.scss';
 
 const costColors = ['#2D6A4F', '#E76F51', '#E9C46A', '#264653', '#40916C'];
@@ -18,7 +19,8 @@ const CrewPage: React.FC = () => {
     addEstimatedCost, removeEstimatedCost,
     addEmergencyContact, removeEmergencyContact,
     updateVehiclePassengers,
-    updateCostSplit
+    updateCostSplit,
+    toggleMemberConfirm
   } = useCamping();
 
   const [modalType, setModalType] = useState<ModalType>('');
@@ -64,6 +66,32 @@ const CrewPage: React.FC = () => {
     return state.estimatedCost.some(c => c.splitMemberIds && c.splitMemberIds.length > 0);
   }, [state.estimatedCost]);
 
+  const boardStats = useMemo(() => {
+    const total = state.members.length;
+    const confirmedCount = state.members.filter(m => m.confirmed).length;
+    const assignedCount = state.members.filter(m => {
+      return state.vehicles.some(v => v.passengers.includes(m.id) || v.driver === m.name);
+    }).length;
+    return { total, confirmedCount, assignedCount };
+  }, [state.members, state.vehicles]);
+
+  const getMemberVehicle = (memberId: string) => {
+    const member = state.members.find(m => m.id === memberId);
+    if (!member) return null;
+    const vehicle = state.vehicles.find(v =>
+      v.passengers.includes(memberId) || v.driver === member.name
+    );
+    return vehicle || null;
+  };
+
+  const getMemberClaimedGear = (memberName: string) => {
+    return state.gearList.filter(g => g.claimedBy === memberName).map(g => g.name);
+  };
+
+  const hasPassengerConflict = (memberId: string, currentVehicleId: string) => {
+    return state.vehicles.find(v => v.id !== currentVehicleId && v.passengers.includes(memberId));
+  };
+
   const getInitial = (name: string) => {
     return name ? name.slice(0, 1) : '?';
   };
@@ -104,8 +132,17 @@ const CrewPage: React.FC = () => {
   };
 
   const togglePassengerMember = (memberId: string) => {
+    const vehicle = state.vehicles.find(v => v.id === passengerVehicleId);
+    const maxPassengers = vehicle ? vehicle.seats - 1 : 0;
+    const alreadySelected = passengerSelectedIds.includes(memberId);
+
+    if (!alreadySelected && passengerSelectedIds.length >= maxPassengers) {
+      Taro.showToast({ title: '座位已满', icon: 'none' });
+      return;
+    }
+
     setPassengerSelectedIds(prev =>
-      prev.includes(memberId)
+      alreadySelected
         ? prev.filter(id => id !== memberId)
         : [...prev, memberId]
     );
@@ -152,9 +189,73 @@ const CrewPage: React.FC = () => {
     return state.members.filter(m => m.name !== vehicle.driver);
   };
 
+  const currentVehicle = state.vehicles.find(v => v.id === passengerVehicleId);
+  const remainingSeats = currentVehicle
+    ? Math.max(0, currentVehicle.seats - 1 - passengerSelectedIds.length)
+    : 0;
+
   return (
     <View className={styles.page}>
       <ScrollView scrollY className={styles.content}>
+        <View className={styles.departureBoard}>
+          <View className={styles.boardHeader}>
+            <Text className={styles.boardTitle}>出发确认看板</Text>
+            <Text className={styles.boardStats}>
+              已确认 {boardStats.confirmedCount}/{boardStats.total} 人 · 已分配车辆 {boardStats.assignedCount}/{boardStats.total} 人
+            </Text>
+          </View>
+          {state.members.map(member => {
+            const memberVehicle = getMemberVehicle(member.id);
+            const claimedGear = getMemberClaimedGear(member.name);
+            const isReady = member.confirmed && !!memberVehicle;
+            return (
+              <View
+                key={member.id}
+                className={classnames(styles.boardMemberRow, {
+                  [styles.boardReady]: isReady,
+                  [styles.boardNotReady]: !isReady
+                })}
+              >
+                <View className={styles.boardAvatar}>
+                  <Text className={styles.boardAvatarText}>{getInitial(member.name)}</Text>
+                </View>
+                <View className={styles.boardMemberInfo}>
+                  <View className={styles.boardMemberName}>
+                    <Text style={{ fontWeight: 600 }}>{member.name}</Text>
+                    <View className={styles.boardRoleTag}>
+                      <Text>{member.role}</Text>
+                    </View>
+                  </View>
+                  <View className={styles.boardStatusLine}>
+                    <View
+                      className={styles.confirmToggle}
+                      onClick={() => toggleMemberConfirm(member.id)}
+                    >
+                      <Text className={member.confirmed ? styles.statusOk : styles.statusWarn}>
+                        {member.confirmed ? '✅' : '❌'}
+                      </Text>
+                    </View>
+                    {memberVehicle ? (
+                      <Text className={styles.statusOk}>
+                        🚗 已分配: {memberVehicle.brand} · {memberVehicle.plate}
+                      </Text>
+                    ) : (
+                      <Text className={styles.statusWarn}>⚠️ 未分配车辆</Text>
+                    )}
+                  </View>
+                  <View className={styles.boardGearLine}>
+                    {claimedGear.length > 0 ? (
+                      <Text className={styles.statusOk}>🎒 负责: {claimedGear.join('、')}</Text>
+                    ) : (
+                      <Text className={styles.statusWarn}>⚠️ 无认领物资</Text>
+                    )}
+                  </View>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
         <View className={styles.section}>
           <View className={styles.sectionHeader}>
             <SectionHeader title={`同行人员 (${state.members.length})`} />
@@ -219,11 +320,17 @@ const CrewPage: React.FC = () => {
                   </View>
                   {vehicle.passengers && vehicle.passengers.length > 0 && (
                     <View className={styles.passengerTags}>
-                      {vehicle.passengers.map(pid => (
-                        <View key={pid} className={styles.passengerTag}>
-                          <Text className={styles.passengerTagText}>{getMemberName(pid)}</Text>
-                        </View>
-                      ))}
+                      {vehicle.passengers.map(pid => {
+                        const conflict = hasPassengerConflict(pid, vehicle.id);
+                        return (
+                          <View key={pid} className={styles.passengerTag}>
+                            <Text className={styles.passengerTagText}>{getMemberName(pid)}</Text>
+                            {conflict && (
+                              <Text className={styles.statusWarn} style={{ marginLeft: 4 }}>⚠️</Text>
+                            )}
+                          </View>
+                        );
+                      })}
                     </View>
                   )}
                 </View>
@@ -427,9 +534,17 @@ const CrewPage: React.FC = () => {
             {modalType === 'vehiclePassenger' && (
               <>
                 <Text className={styles.modalTitle}>分配乘客</Text>
+                <View className={styles.modalInfoRow}>
+                  <Text className={classnames(styles.modalInfoText, {
+                    [styles.seatWarning]: remainingSeats === 0
+                  })}>
+                    剩余 {remainingSeats} 座
+                  </Text>
+                </View>
                 <ScrollView scrollY className={styles.checkboxScroll}>
                   {getAvailablePassengers(passengerVehicleId).map(member => {
                     const checked = passengerSelectedIds.includes(member.id);
+                    const conflictVehicle = hasPassengerConflict(member.id, passengerVehicleId);
                     return (
                       <View
                         key={member.id}
@@ -441,6 +556,11 @@ const CrewPage: React.FC = () => {
                             {checked && <Text className={styles.checkboxTick}>✓</Text>}
                           </View>
                           <Text className={styles.checkboxLabel}>{member.name}</Text>
+                          {conflictVehicle && (
+                            <View className={styles.passengerConflictBadge}>
+                              <Text>已在 {conflictVehicle.brand}</Text>
+                            </View>
+                          )}
                         </View>
                       </View>
                     );

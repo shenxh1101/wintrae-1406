@@ -58,10 +58,10 @@ export const initialState: CampingState = {
     notes: '海拔约600米，夜间温度较低，建议带厚外套'
   },
   members: [
-    { id: 'm1', name: '张三', phone: '13800138001', role: '领队' },
-    { id: 'm2', name: '李四', phone: '13800138002', role: '副领队' },
-    { id: 'm3', name: '王五', phone: '13800138003', role: '厨师' },
-    { id: 'm4', name: '赵六', phone: '13800138004', role: '摄影师' }
+    { id: 'm1', name: '张三', phone: '13800138001', role: '领队', confirmed: true },
+    { id: 'm2', name: '李四', phone: '13800138002', role: '副领队', confirmed: true },
+    { id: 'm3', name: '王五', phone: '13800138003', role: '厨师', confirmed: false },
+    { id: 'm4', name: '赵六', phone: '13800138004', role: '摄影师', confirmed: false }
   ],
   vehicles: [
     { id: 'v1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: ['m2', 'm3'] },
@@ -146,10 +146,10 @@ export const initialState: CampingState = {
         notes: '海拔约600米，夜间温度较低，建议带厚外套'
       },
       members: [
-        { id: 'm1', name: '张三', phone: '13800138001', role: '领队' },
-        { id: 'm2', name: '李四', phone: '13800138002', role: '副领队' },
-        { id: 'm3', name: '王五', phone: '13800138003', role: '厨师' },
-        { id: 'm4', name: '赵六', phone: '13800138004', role: '摄影师' }
+        { id: 'm1', name: '张三', phone: '13800138001', role: '领队', confirmed: true },
+        { id: 'm2', name: '李四', phone: '13800138002', role: '副领队', confirmed: true },
+        { id: 'm3', name: '王五', phone: '13800138003', role: '厨师', confirmed: false },
+        { id: 'm4', name: '赵六', phone: '13800138004', role: '摄影师', confirmed: false }
       ],
       vehicles: [
         { id: 'v1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: ['m2', 'm3'] },
@@ -164,7 +164,24 @@ export const initialState: CampingState = {
         { id: 'ec2', name: '营地费', amount: 300 },
         { id: 'ec3', name: '食材采购', amount: 500 },
         { id: 'ec4', name: '其他杂费', amount: 200 }
-      ]
+      ],
+      departureSnapshot: {
+        members: [
+          { id: 'm1', name: '张三', phone: '13800138001', role: '领队', confirmed: true },
+          { id: 'm2', name: '李四', phone: '13800138002', role: '副领队', confirmed: true },
+          { id: 'm3', name: '王五', phone: '13800138003', role: '厨师', confirmed: false },
+          { id: 'm4', name: '赵六', phone: '13800138004', role: '摄影师', confirmed: false }
+        ],
+        vehicles: [
+          { id: 'v1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: ['m2', 'm3'] },
+          { id: 'v2', brand: '丰田 RAV4', plate: '浙A·67890', driver: '李四', seats: 5, passengers: ['m4'] }
+        ],
+        gearClaimedBy: {
+          '张三': ['双人帐篷', '天幕', '急救包'],
+          '李四': ['防潮垫', '锅具套装', '驱蚊液'],
+          '王五': ['便携炉具', '面包早餐']
+        }
+      }
     }
   },
   pastTrips: [
@@ -231,8 +248,8 @@ export const initialState: CampingState = {
           notes: '湖边风大，注意防风'
         },
         members: [
-          { id: 'pm1', name: '张三', phone: '13800138001', role: '领队' },
-          { id: 'pm2', name: '李四', phone: '13800138002', role: '副领队' }
+          { id: 'pm1', name: '张三', phone: '13800138001', role: '领队', confirmed: true },
+          { id: 'pm2', name: '李四', phone: '13800138002', role: '副领队', confirmed: true }
         ],
         vehicles: [
           { id: 'pv1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: ['pm2'] }
@@ -244,7 +261,20 @@ export const initialState: CampingState = {
           { id: 'pec1', name: '油费/过路费', amount: 380 },
           { id: 'pec2', name: '营地费', amount: 240 },
           { id: 'pec3', name: '食材采购', amount: 460 }
-        ]
+        ],
+        departureSnapshot: {
+          members: [
+            { id: 'pm1', name: '张三', phone: '13800138001', role: '领队', confirmed: true },
+            { id: 'pm2', name: '李四', phone: '13800138002', role: '副领队', confirmed: true }
+          ],
+          vehicles: [
+            { id: 'pv1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: ['pm2'] }
+          ],
+          gearClaimedBy: {
+            '张三': ['双人帐篷'],
+            '李四': ['防潮垫']
+          }
+        }
       }
     },
     {
@@ -306,7 +336,7 @@ export const initialState: CampingState = {
           notes: '野营地，设施不全'
         },
         members: [
-          { id: 'qm1', name: '张三', phone: '13800138001', role: '领队' }
+          { id: 'qm1', name: '张三', phone: '13800138001', role: '领队', confirmed: true }
         ],
         vehicles: [
           { id: 'qv1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: [] }
@@ -315,7 +345,18 @@ export const initialState: CampingState = {
         estimatedCost: [
           { id: 'qec1', name: '油费', amount: 200 },
           { id: 'qec2', name: '食材', amount: 380 }
-        ]
+        ],
+        departureSnapshot: {
+          members: [
+            { id: 'qm1', name: '张三', phone: '13800138001', role: '领队', confirmed: true }
+          ],
+          vehicles: [
+            { id: 'qv1', brand: '特斯拉 Model Y', plate: '浙A·12345', driver: '张三', seats: 5, passengers: [] }
+          ],
+          gearClaimedBy: {
+            '张三': ['双人帐篷', '便携炉具', '急救包']
+          }
+        }
       }
     }
   ]

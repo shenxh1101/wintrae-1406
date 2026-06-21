@@ -3,7 +3,88 @@ import { View, Text, Image, Input, ScrollView, Textarea } from '@tarojs/componen
 import Taro from '@tarojs/taro';
 import { useCamping } from '@/store/CampingContext';
 import { genId } from '@/utils/id';
+import { Member, Vehicle } from '@/types/camping';
 import styles from './index.module.scss';
+
+interface DepartureSnapshotProps {
+  snapshot: {
+    members: Member[];
+    vehicles: Vehicle[];
+    gearClaimedBy: Record<string, string[]>;
+  };
+}
+
+const DepartureSnapshot: React.FC<DepartureSnapshotProps> = ({ snapshot }) => {
+  const memberMap = useMemo(() => {
+    const map: Record<string, Member> = {};
+    snapshot.members.forEach(m => {
+      map[m.id] = m;
+    });
+    return map;
+  }, [snapshot.members]);
+
+  return (
+    <View className={styles.departureSnapshotSection}>
+      <Text className={styles.snapshotSectionTitle}>📋 出发确认</Text>
+
+      {snapshot.vehicles.map(vehicle => {
+        const passengerNames = vehicle.passengers
+          .map(pid => memberMap[pid]?.name)
+          .filter(Boolean);
+        return (
+          <View key={vehicle.id} className={styles.snapshotVehicleBlock}>
+            <Text className={styles.snapshotVehicleName}>
+              🚗 {vehicle.brand} · {vehicle.plate}（司机：{vehicle.driver}）
+            </Text>
+            <View className={styles.snapshotPassengerTags}>
+              <View className={`${styles.snapshotPassengerTag} ${styles.snapshotDriverTag}`}>
+                <Text>司机：{vehicle.driver}</Text>
+              </View>
+              {passengerNames.map((name, idx) => (
+                <View key={idx} className={styles.snapshotPassengerTag}>
+                  <Text>{name}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        );
+      })}
+
+      {snapshot.members.map(member => {
+        const gear = snapshot.gearClaimedBy[member.name] || [];
+        return (
+          <View key={member.id} className={styles.snapshotMemberRow}>
+            <View className={styles.snapshotMemberAvatar}>
+              <Text>{member.name.charAt(0)}</Text>
+            </View>
+            <View className={styles.snapshotMemberInfo}>
+              <View style={{ display: 'flex', alignItems: 'center', gap: '12rpx' }}>
+                <Text className={styles.snapshotMemberName}>{member.name}</Text>
+                <Text style={{ fontSize: '22rpx', color: '#999' }}>· {member.role}</Text>
+              </View>
+              <View style={{ marginTop: '8rpx' }}>
+                {gear.length > 0 ? (
+                  <Text className={styles.snapshotGearLine}>🎒 负责: {gear.join('、')}</Text>
+                ) : (
+                  <Text className={styles.snapshotGearLine}>无认领物资</Text>
+                )}
+              </View>
+            </View>
+            {member.confirmed ? (
+              <View className={styles.snapshotConfirmedBadge}>
+                <Text>✅ 已确认</Text>
+              </View>
+            ) : (
+              <View className={styles.snapshotUnconfirmedBadge}>
+                <Text>⚠️ 未确认</Text>
+              </View>
+            )}
+          </View>
+        );
+      })}
+    </View>
+  );
+};
 
 const ReviewPage: React.FC = () => {
   const {
@@ -96,11 +177,20 @@ const ReviewPage: React.FC = () => {
     });
   };
 
+  const currentDepartureSnapshot = state.review.planSnapshot?.departureSnapshot;
+
   return (
     <View className={styles.page}>
       <ScrollView scrollY className={styles.scrollContent}>
         <View className={styles.currentTrip}>
-          <Text className={styles.currentTitle}>当前行程复盘</Text>
+          <View className={styles.currentTitleRow}>
+            <Text className={styles.currentTitle}>当前行程复盘</Text>
+            {state.review.archived && (
+              <View className={styles.archivedBadge}>
+                <Text className={styles.archivedBadgeText}>已归档</Text>
+              </View>
+            )}
+          </View>
 
           <View className={styles.photoSection}>
             <View className={styles.sectionHeader}>
@@ -180,6 +270,10 @@ const ReviewPage: React.FC = () => {
           <View className={styles.archiveBtn} onClick={handleArchive}>
             <Text className={styles.archiveBtnText}>📦 归档到历史行程</Text>
           </View>
+
+          {state.review.archived && currentDepartureSnapshot && (
+            <DepartureSnapshot snapshot={currentDepartureSnapshot} />
+          )}
         </View>
 
         <View className={styles.divider}></View>
@@ -221,6 +315,10 @@ const ReviewPage: React.FC = () => {
                 </View>
                 <Text className={styles.tripDate}>{trip.date}</Text>
               </View>
+
+              {trip.planSnapshot?.departureSnapshot && (
+                <DepartureSnapshot snapshot={trip.planSnapshot.departureSnapshot} />
+              )}
 
               {trip.photos.length > 0 && (
                 <View className={styles.pastPhotoSection}>
@@ -273,7 +371,7 @@ const ReviewPage: React.FC = () => {
               )}
 
               <View className={styles.copyButton} onClick={() => handleCopy(trip.id)}>
-                <Text className={styles.copyButtonText}>� 复制为新计划</Text>
+                <Text className={styles.copyButtonText}>📋 复制为新计划</Text>
               </View>
             </View>
           ))
